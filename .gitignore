@@ -1,0 +1,21 @@
+# Enviroment
+.env
+.env.*
+
+# Database configuration
+config/database.php
+
+# Dependencies
+/vendor/
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
