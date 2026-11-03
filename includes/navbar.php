@@ -17,7 +17,7 @@
             </a>
 
             <a href="#about" class="nav-link">
-                Về chúng tôi
+                Về Rốp Rẻng
             </a>
 
         </nav>
@@ -25,8 +25,7 @@
         <div class="header-actions">
 
             <a href="#menu" class="header-order-button">
-                Khám phá ngay
-                <span>↗</span>
+                XEM MENU<span>↗</span>
             </a>
 
             <button
@@ -42,5 +41,5 @@
         </div>
 
     </div>
-    
+
 </header>

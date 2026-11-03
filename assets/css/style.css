@@ -1,18 +1,22 @@
 :root {
-    --color-orange: #FF713B;
-    --color-cream: #FFF4E5;
-    --color-brown: #38251D;
-    --color-yellow: #FFD66B;
-    --color-coral: #F6A9A0;
+    --color-primary: #293706;
+    --color-primary-light: #465B16;
+
+    --color-background: #F5EEC9;
+    --color-accent: #D9E75B;
+    --color-yellow: #F2C75C;
+
+    --color-text: #24271C;
+    --color-muted: #777B62;
     --color-white: #FFFFFF;
 
     --font-main: 'Be Vietnam Pro', sans-serif;
 
-    --container-width: 1200px;
+    --container-width: 1240px;
 
-    --radius-sm: 12px;
-    --radius-md: 20px;
-    --radius-lg: 30px;
+    --radius-sm: 10px;
+    --radius-md: 18px;
+    --radius-lg: 26px;
 
     --transition: 0.3s ease;
 }
@@ -58,7 +62,7 @@ img {
     display: flex;
     align-items: end;
     justify-content: space-between;
-    margin-bottom: 38px;
+    margin-bottom: 36px;
 }
 
 .section-eyebrow {
@@ -66,7 +70,7 @@ img {
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 2px;
-    color: var(--color-orange);
+    color: var(--color-primary-light);
     margin-bottom: 12px;
 }
 
@@ -78,14 +82,14 @@ img {
 }
 
 .section-heading h2 span {
-    color: var(--color-orange);
+    color: var(--color-primary-light);
 }
 
 .section-heading > p {
-    max-width: 270px;
+    max-width: 280px;
     font-size: 13px;
     line-height: 1.8;
-    color: #80695D;
+    color: var(--color-muted);
 }
 
 .button-primary,
@@ -93,33 +97,31 @@ img {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 22px;
-    padding: 17px 24px;
-    border-radius: 50px;
+    gap: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: 800;
     transition: var(--transition);
 }
 
 .button-primary {
-    background: var(--color-brown);
-    color: var(--color-cream);
+    background: var(--color-accent);
+    color: var(--color-primary);
 }
 
 .button-primary:hover {
     background: var(--color-yellow);
-    color: var(--color-brown);
     transform: translateY(-3px);
 }
 
 .button-secondary {
-    border: 1px solid var(--color-brown);
-    color: var(--color-brown);
+    background: var(--color-primary);
+    color: var(--color-background);
 }
 
 .button-secondary:hover {
-    background: var(--color-brown);
-    color: var(--color-cream);
+    background: var(--color-primary-light);
 }
 
 @media (max-width: 768px) {
@@ -128,7 +130,7 @@ img {
     }
 
     .section-heading {
-        align-items: start;
+        align-items: flex-start;
         flex-direction: column;
         gap: 14px;
     }
