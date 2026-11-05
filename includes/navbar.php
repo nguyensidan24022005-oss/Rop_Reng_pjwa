@@ -3,7 +3,10 @@
     <div class="container header-container">
 
         <a href="index.php" class="brand-logo">
-            RỐP RẺNG<span>.</span>
+            <img
+                src="assets/images/brand/logo-rop-reng.png"
+                alt="Rốp Rẻng - Cà phê & Giải khát"
+            >
         </a>
 
         <nav class="main-navigation" id="mainNavigation">

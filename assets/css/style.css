@@ -7,7 +7,7 @@
     --color-yellow: #F2C75C;
 
     --color-text: #24271C;
-    --color-muted: #777B62;
+    --color-muted: #C6C8A8;
     --color-white: #FFFFFF;
 
     --font-main: 'Be Vietnam Pro', sans-serif;
@@ -29,12 +29,19 @@
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: 90px;
 }
 
 body {
+    min-height: 100vh;
     font-family: var(--font-main);
-    background: var(--color-cream);
-    color: var(--color-brown);
+    color: var(--color-background);
+    background-color: var(--color-primary);
+    background-image: url('../images/backgrounds/hero-background.png');
+    background-repeat: repeat;
+    background-position: center top;
+    background-size: 1100px auto;
+    background-attachment: fixed;
     overflow-x: hidden;
 }
 
@@ -67,29 +74,29 @@ img {
 
 .section-eyebrow {
     display: block;
+    margin-bottom: 12px;
+    color: var(--color-accent);
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 2px;
-    color: var(--color-primary-light);
-    margin-bottom: 12px;
 }
 
 .section-heading h2 {
-    font-size: 36px;
+    font-size: clamp(28px, 3vw, 40px);
     font-weight: 900;
     line-height: 1.2;
     letter-spacing: -1.5;
 }
 
 .section-heading h2 span {
-    color: var(--color-primary-light);
+    color: var(--color-accent);
 }
 
 .section-heading > p {
     max-width: 280px;
+    color: var(--color-muted);
     font-size: 13px;
     line-height: 1.8;
-    color: var(--color-muted);
 }
 
 .button-primary,
@@ -97,8 +104,9 @@ img {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: 16px;
     padding: 16px 24px;
+    border: 0;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 800;
@@ -116,15 +124,25 @@ img {
 }
 
 .button-secondary {
-    background: var(--color-primary);
-    color: var(--color-background);
+    background: var(--color-background);
+    color: var(--color-primary);
 }
 
 .button-secondary:hover {
-    background: var(--color-primary-light);
+    background: var(--color-accent);
+    transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
+    html {
+        scroll-padding-top: 75px;
+    }
+
+    body {
+        background-size: 850px auto;
+        background-attachment: scroll;
+    }
+    
     .container {
         width: calc(100% - 36px);
     }
