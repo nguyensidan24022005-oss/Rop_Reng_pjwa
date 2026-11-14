@@ -1,3 +1,9 @@
+<?php
+
+$currentPage = $currentPage ?? 'home'
+
+?>
+
 <header class="site-header">
 
     <div class="container header-container">
@@ -11,12 +17,18 @@
 
         <nav class="main-navigation" id="mainNavigation">
 
-            <a href="index.php" class="nav-link active">
-                Trang chủ
+            <a 
+            href="index.php"
+            class="nav-link <?= $currentPage === 'home' ? 'active' : '' ?>"
+            >
+                    Trang chủ
             </a>
 
-            <a href="#categories" class="nav-link">
-                Danh mục
+            <a 
+            href="menu.php"
+            class="nav-link <?= $currentPage === 'menu' ? 'active' : '' ?>"
+            >
+                Menu
             </a>
 
             <a href="#about" class="nav-link">
@@ -26,10 +38,6 @@
         </nav>
 
         <div class="header-actions">
-
-            <a href="#menu" class="header-order-button">
-                XEM MENU<span>↗</span>
-            </a>
 
             <button
                 class="menu-toggle"

@@ -58,6 +58,24 @@ $categoryQuery = $pdo->query(
 
 $drinkCategories = $categoryQuery->fetchAll();
 
+$productQuery = $pdo->query(
+    "SELECT
+        p.id,
+        p.name,
+        p.price,
+        p.image,
+        c.name AS category_name,
+        c.slug AS category_slug
+    FROM products p
+    INNER JOIN categories c
+        ON c.id = p.category_id
+    WHERE p.is_active = 1
+        AND c.is_active = 1
+    ORDER BY p.id ASC"
+);
+
+$products = $productQuery->fetchAll();
+
 ?>
 
 
@@ -141,5 +159,80 @@ $drinkCategories = $categoryQuery->fetchAll();
         </div>
 
     </div>
+
+</section>
+
+<section class="product-section" id="featured-products">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="section-heading">
+                        OUR PICKS
+                    </span>
+
+                    <h2>
+                        MÓN <span>NỔI BẬT.</span>
+                    </h2>
+                </div>
+
+                <p>
+                    Những thức uống được Rốp Rẻng
+                    lựa chọn để bạn khám phá.
+                </p>
+
+            </div>
+
+            <div class="product-grid">
+
+                <?php foreach ($products as $product): ?>
+
+                    <article class="product-card">
+
+                        <div class="product-image">
+
+                            <?php if (!empty($product['image'])): ?>
+
+                                <img
+                                    src="<?= htmlspecialchars($product['image'], ENT_QUOTES, 'UTF-8') ?>"
+                                    alt="<?= htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8') ?>"
+                                    loading="lazy"
+                                >
+
+                            <?php else: ?>
+
+                                <div class="product-image-placeholder">
+                                    <span>RỐP RẺNG</span>
+                                </div>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                        <div class="product-card-content">
+
+                            <span class="product-category">
+                                <?= htmlspecialchars($product['category_name'], ENT_QUOTES, 'UTF-8') ?>
+                            </span>
+
+                            <h3>
+                                <?= htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8') ?>
+                            </h3>
+
+                            <span class="product-price">
+                                <?= number_format($product['price'], 0, ',', '.') ?>đ
+                            </span>
+
+                        </div>
+
+                    </article>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        </div>
 
 </section>

@@ -26,6 +26,8 @@ if (!isset($pageTitle)) {
     <link rel="stylesheet" href="assets/css/style.css">
 
     <link rel="stylesheet" href="assets/css/homepage.css">
+
+    <link rel="stylesheet" href="assets/css/menu.css">
 </head>
 
 <body>

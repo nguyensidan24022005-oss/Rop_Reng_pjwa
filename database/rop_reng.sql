@@ -59,7 +59,7 @@ COLLATE=utf8mb4_unicode_ci;
 INSERT INTO categories (name, slug) VALUES
 ('Giải khát cà phê', 'giaikhatcaphe'),
 ('Latte', 'latte'),
-('Nước giải khát', 'nuocgiakhat'),
+('Nước giải khát', 'nuocgiaikhat'),
 ('Phê đi', 'phedi'),
 ('Quốc dân cà phê', 'quocdancaphe'),
 ('Thong dong cà phê', 'thongdongcaphe'),
