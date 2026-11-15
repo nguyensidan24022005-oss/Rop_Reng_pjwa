@@ -127,9 +127,29 @@ function addToCart(product) {
 
     saveCart(cart);
 
+    updateCartCount();
+
     showCartToast(
         `${product.productName} đã được thêm vào giỏ hàng`
     );
+}
+
+function updateCartCount() {
+
+    const cart = getCart();
+
+    const totalQuantity = cart.reduce(
+        (total, item) => total + item.quantity,
+        0
+    );
+
+    const cartCount = document.getElementById('cartCount');
+
+    if (!cartCount) {
+        return;
+    }
+
+    cartCount.textContent = totalQuantity;
 }
 
 document.addEventListener('click', event => {
@@ -176,5 +196,234 @@ document.addEventListener('click', event => {
         variantName,
         price,
     });
-    
+
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateCartCount();
+});
+
+function renderCart() {
+
+    const cartBody = document.getElementById('cartDrawerBody');
+    const cartSubtotal = document.getElementById('cartSubtotal');
+    const cartCheckout = document.getElementById('cartCheckout');
+
+    if (!cartBody || !cartSubtotal) {
+        return;
+    }
+
+    const cart = getCart();
+
+    if (cart.length === 0) {
+
+        cartBody.innerHTML = `
+            <div class="cart-empty">
+                <p>GIỎ HÀNG ĐANG TRỐNG</p>
+                <span>Hãy chọn một món.</span>
+            </div>
+        `;
+
+        cartSubtotal.textContent = '0đ';
+
+        if (cartCheckout) {
+            cartCheckout.disabled= true;
+        }
+
+        return;
+    }
+
+    if (cartCheckout) {
+        cartCheckout.disabled = false;
+    }
+
+    let subtotal = 0;
+
+    cartBody.innerHTML = cart.map(item => {
+
+        const itemTotal = item.price * item.quantity;
+
+        subtotal += itemTotal;
+
+        return `
+            <article class="cart-item">
+
+                <div class="cart-item-info">
+
+                    <h3>
+                        ${item.productName}
+                    </h3>
+
+                    <span>
+                        ${item.variantName}
+                    </span>
+
+                    <strong>
+                        ${item.price.toLocaleString('vi-VN')}đ
+                    </strong>
+
+                </div>
+
+                <div class="cart-item-quantity">
+
+                    <button
+                        type="button"
+                        class="cart-quantity-button"
+                        data-cart-action="decrease"
+                        data-cart-key="${item.cartKey}"
+                    >
+                        −
+                    </button>
+
+                    <span>
+                        ${item.quantity}
+                    </span>
+
+                    <button
+                        type="button"
+                        class="cart-quantity-button"
+                        data-cart-action="increase"
+                        data-cart-key="${item.cartKey}"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="cart-item-remove"
+                    data-cart-action="remove"
+                    data-cart-key="${item.cartKey}"
+                >
+                    XÓA
+                </button>
+
+            </article>
+        `;
+
+    }).join('');
+
+    cartSubtotal.textContent =
+        `${subtotal.toLocaleString('vi-VN')}đ`;
+}
+
+function updateCartItemQuantity(cartKey, action) {
+
+    const cart = getCart();
+
+    const item = cart.find(
+        item => item.cartKey === cartKey
+    );
+
+    if (!item) {
+        return;
+    }
+
+    if (action === 'increase') {
+        item.quantity += 1;
+    }
+
+    if (action === 'decrease') {
+        item.quantity -= 1;
+    }
+
+    if (action === 'remove') {
+
+        const updatedCart = cart.filter(
+            item => item.cartKey !== cartKey
+        );
+
+        saveCart(updatedCart);
+
+        updateCartCount();
+
+        renderCart();
+
+        return;
+    }
+
+    const updatedCart = cart.filter(
+        item => item.quantity > 0
+    );
+
+    saveCart(updatedCart);
+
+    updateCartCount();
+
+    renderCart();
+}
+
+document.addEventListener('click', event => {
+
+    const button = event.target.closest(
+        '[data-cart-action]'
+    );
+
+    if (!button) {
+        return;
+    }
+
+    const action = button.dataset.cartAction;
+    const cartKey = button.dataset.cartKey;
+
+    if (!action || !cartKey) {
+        return;
+    }
+
+    updateCartItemQuantity(
+        cartKey,
+        action
+    );
+
+});
+
+
+const cartToggle = document.getElementById('cartToggle');
+const cartDrawer = document.getElementById('cartDrawer');
+const cartClose = document.getElementById('cartClose');
+const cartOverlay = document.getElementById('cartOverlay');
+
+function openCartDrawer() {
+
+    if (!cartDrawer || !cartOverlay) {
+        return;
+    }
+
+    renderCart();
+
+    cartDrawer.classList.add('is-open');
+    cartOverlay.classList.add('is-open');
+
+    cartDrawer.setAttribute('aria-hidden', 'false');
+
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCartDrawer() {
+
+    if (!cartDrawer || !cartOverlay) {
+        return;
+    }
+
+    cartDrawer.classList.remove('is-open');
+    cartOverlay.classList.remove('is-open');
+
+    cartDrawer.setAttribute('aria-hidden', 'true');
+
+    document.body.style.overflow = '';
+}
+
+cartToggle?.addEventListener('click', openCartDrawer);
+
+cartClose?.addEventListener('click', closeCartDrawer);
+
+cartOverlay?.addEventListener('click', closeCartDrawer);
+
+document.addEventListener('keydown', event => {
+
+    if (event.key === 'Escape') {
+        closeCartDrawer();
+    }
+
 });

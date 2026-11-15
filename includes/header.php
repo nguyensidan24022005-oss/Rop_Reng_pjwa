@@ -23,12 +23,11 @@ if (!isset($pageTitle)) {
 
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
 
-    <link rel="stylesheet" href="assets/css/homepage.css">
+    <link rel="stylesheet" href="assets/css/homepage.css?v=<?= filemtime(__DIR__ . '/../assets/css/homepage.css') ?>">
 
-    <link rel="stylesheet" href="assets/css/menu.css">
-</head>
+    <link rel="stylesheet" href="assets/css/menu.css?v=<?= filemtime(__DIR__ . '/../assets/css/menu.css') ?>"></head>
 
 <body>
     

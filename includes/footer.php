@@ -10,6 +10,7 @@
                 <img
                     src="assets/images/brand/logo-rop-reng.png"
                     alt="Rốp Rẻng - Cà phê & Giải khát"
+                >
             </a>
 
             <p>
