@@ -17,6 +17,10 @@ if (!isset($pageTitle)) {
 
     <title><?= htmlspecialchars($pageTitle) ?></title>
 
+    <?php if (isset($baseHref)) : ?>
+        <base href="<?= htmlspecialchars($baseHref, ENT_QUOTES, 'UTF-8') ?>">
+    <?php endif; ?>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,10 +29,13 @@ if (!isset($pageTitle)) {
 
     <link rel="stylesheet" href="assets/css/style.css?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
 
-    <link rel="stylesheet" href="assets/css/homepage.css?v=<?= filemtime(__DIR__ . '/../assets/css/homepage.css') ?>">
+    <link rel="stylesheet" href="assets/css/homepage.css">
 
-    <link rel="stylesheet" href="assets/css/menu.css?v=<?= filemtime(__DIR__ . '/../assets/css/menu.css') ?>"></head>
+    <link rel="stylesheet" href="assets/css/menu.css">
 
+    <link rel="stylesheet" href="assets/css/checkout.css?v=<?= filemtime(__DIR__ . '/../assets/css/checkout.css') ?>">
+
+    <link rel="stylesheet" href="assets/css/admin.css">
 <body>
     
     <?php require_once __DIR__ . '/navbar.php'; ?>
