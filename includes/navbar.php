@@ -39,6 +39,13 @@ $currentPage = $currentPage ?? 'home'
 
         <div class="header-actions">
 
+            <a 
+                href="admin/"
+                class="header-admin-link"
+            >
+                QUẢN TRỊ ↗
+            </a>
+
             <button
                 type="button"
                 class="header-cart-button"

@@ -100,7 +100,7 @@ try {
     $currentStatus = $order['status'];
 
     $allowedTransitions = [
-        'pending' > [
+        'pending' => [
             'confirmed',
             'cancelled'
         ],

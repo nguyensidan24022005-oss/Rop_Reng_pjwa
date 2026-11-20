@@ -49,7 +49,7 @@
     text-align: center;
 }
 
-.admin-order-count spann {
+.admin-order-count span {
     display: block;
     color: #D9E75B;
     font-size: 32px;
@@ -99,7 +99,7 @@
     font-weight: 800;
 }
 
-.admin-refesh-button {
+.admin-refresh-button {
     min-height: 40px;
     padding: 0 15px;
     border: 1px solid rgba(245, 238, 201, 0.18);
@@ -112,11 +112,11 @@
     font-weight: 800;
     letter-spacing: 0.04em;
     transition:
-        background 0.2s ease
+        background 0.2s ease,
         border-color 0.2s ease;
 }
 
-.admin-refesh-button:hover {
+.admin-refresh-button:hover {
     border-color: #D9E75B;
     background: rgba(217, 231, 91, 0.08);
 }
@@ -139,7 +139,7 @@
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.08em;
-    text-align: text;
+    text-align: center;
     white-space: nowrap;
 }
 
@@ -305,6 +305,7 @@
     border: 1px solid rgba(245, 238, 201, 0.12);
     border-radius: 18px;
     background: rgba(245, 238, 201, 0.65);
+    color: #293706;
     font-size: 13px;
     font-weight: 700;
 }
@@ -644,6 +645,313 @@
 
     .admin-detail-total strong {
         font-size: 20px;
+    }
+    
+}
+
+.admin-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.admin-dashboard-card {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    min-height: 190px;
+    padding: 24px;
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid rgba(41, 55, 6, 0.15);
+    background: rgba(245, 238, 201, 0.45);
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.admin-dashboard-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(41, 55, 6, 0.35);
+    background: rgba(245, 238, 201, 0.75);
+}
+
+.admin-dashboard-card-number {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.admin-dashboard-card h3 {
+    margin: 6px 0 8px;
+    font-size: 24px;
+}
+
+.admin-dashboard-card p {
+    margin: 0;
+    max-width: 280px;
+    line-height: 1.6;
+}
+
+.admin-dashboard-card-arrow {
+    position: absolute;
+    right: 24px;
+    bottom: 20px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.admin-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.admin-action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: 0 18px;
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid rgba(41, 55, 6, 0.2);
+    font-weight: 700;
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+.admin-action-button:hover {
+    transform: translateY(-2px);
+    background: rgba(217, 231, 91, 0.35);
+}
+
+@media (max-width: 768px) {
+
+    .admin-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-dashboard-card {
+        min-height: 160px;
+    }
+
+    .admin-quick-actions {
+        flex-direction: column;
+    }
+
+    .admin-action-button {
+        width: 100%;
+    }
+    
+}
+
+.admin-stats-section {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+}
+
+.admin-stats-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.admin-stats-group-header small {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.admin-stats-group-header h3 {
+    margin: 5px 0 0;
+    font-size: 20px;
+}
+
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.admin-stats-grid-revenue {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-stat-card {
+    min-height: 120px;
+    padding: 20px;
+    border: 1px solid rgba(41, 55, 6, 0.15);
+    background: rgba(245, 238, 201, 0.35);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.admin-stat-card span {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.admin-stat-card strong {
+    font-size: 30px;
+    line-height: 1;
+}
+
+.admin-stat-card-highlight {
+    min-height: 140px;
+}
+
+.admin-stat-card-highlight strong {
+    font-size: 26px;
+}
+
+@media (max-width: 900px) {
+
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-stats-grid-revenue {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 560px) {
+
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+.admin-products-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-products-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.admin-products-table th,
+.admin-products-table td {
+    padding: 16px 14px;
+    text-align: left;
+    border-bottom: 1px solid rgba(41, 55, 6, 0.12);
+    vertical-align: middle;
+}
+
+.admin-products-table th {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-product-image {
+    width: 64px;
+    height: 64px;
+    overflow: hidden;
+    background: rgba(41, 55, 6, 0.08);
+}
+
+.admin-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.admin-product-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.admin-product-name {
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.admin-product-category {
+    font-size: 12px;
+}
+
+.admin-product-price {
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.admin-product-variants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.admin-product-variant {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border: 1px solid rgba(41, 55, 6, 0.15);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.admin-product-variant strong {
+    font-weight: 800;
+}
+
+.admin-product-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 9px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+.admin-product-status-active {
+    background: rgba(217, 231, 91, 0.45);
+}
+
+.admin-product-status-inactive {
+    background: rgba(36, 39, 28, 0.12);
+}
+
+.admin-product-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.admin-product-flag {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+
+    .admin-products-table {
+        min-width: 760px;
     }
     
 }

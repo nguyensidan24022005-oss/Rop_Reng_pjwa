@@ -34,9 +34,15 @@ try {
     }
 
 
-    $customerName = trim(
-        $input['customer_name'] ?? ''
-    );
+    $customerName = $input['customer_name'] ?? '';
+
+    if (!is_string($customerName)) {
+        throw new InvalidArgumentException(
+            'Tên khách hàng không hợp lệ.'
+        );
+    }
+
+    $customerName = trim($customerName);
 
     if ($customerName !== '') {
         $customerName = mb_substr(
@@ -107,24 +113,46 @@ try {
 
     foreach ($items as $item) {
 
-        $productId = (int) ($item['product_id'] ?? 0);
-        $variantId = (int) ($item['variant_id'] ?? 0);
-        $quantity = (int) ($item['quantity'] ?? 0);
-
-        $note = trim(
-            $item['note'] ?? ''
-        );
-
-        if (
-            $productId <= 0 ||
-            $variantId <= 0 ||
-            $quantity <= 0 ||
-            $quantity > 99
-        ) {
-            throw new Exception(
+        if (!is_array($item)) {
+            throw new InvalidArgumentException(
                 'Thông tin sản phẩm trong đơn không hợp lệ.'
             );
         }
+
+        $productId = filter_var(
+            $item['product_id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        $variantId = filter_var(
+            $item['variant_id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+        $quantity = filter_var(
+            $item['quantity'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1, 'max_range' => 99]]
+        );
+        $note = $item['note'] ?? '';
+
+        if (
+            $productId === false ||
+            $variantId === false ||
+            $quantity === false
+        ) {
+            throw new InvalidArgumentException(
+                'Thông tin sản phẩm trong đơn không hợp lệ.'
+            );
+        }
+
+        if (!is_string($note)) {
+            throw new InvalidArgumentException(
+                'Ghi chú sản phẩm không hợp lệ.'
+            );
+        }
+
+        $note = trim($note);
 
         if ($note !== '') {
             $note = mb_substr(
@@ -141,7 +169,7 @@ try {
         $product = $productQuery->fetch();
 
         if (!$product) {
-            throw new Exception(
+            throw new InvalidArgumentException(
                 'Không tìm thấy sản phẩm.'
             );
         }
@@ -150,7 +178,7 @@ try {
             (int) $product['product_active'] !== 1 ||
             (int) $product['category_active'] !== 1
         ) {
-            throw new Exception(
+            throw new InvalidArgumentException(
                 'Sản phẩm hiện không khả dụng.'
             );
         }
@@ -162,7 +190,7 @@ try {
         $variant = $variantQuery->fetch();
 
         if (!$variant) {
-            throw new Exception(
+            throw new InvalidArgumentException(
                 'Không tìm thấy sản phẩm.'
             );
         }
@@ -170,13 +198,13 @@ try {
         if (
             (int) $variant['product_id'] !== $productId
         ) {
-            throw new Exception(
+            throw new InvalidArgumentException(
                 'Phiên bản sản phẩm không hợp lệ.'
             );
         }
 
         if ((int) $variant['is_active'] !== 1) {
-            throw new Exception(
+            throw new InvalidArgumentException(
                 'Phiên bản sản phẩm hiện không khả dụng.'
             );
         }
@@ -288,16 +316,28 @@ try {
             'total' => $subtotal
         ]
     ]);
-} catch (Throwable $e) {
-
+} catch (InvalidArgumentException $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
+
+    http_response_code(400);
+
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
+} catch (Throwable $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
+    error_log('Create order failed: ' . $e->getMessage());
 
     http_response_code(500);
 
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
+        'message' => 'Không thể tạo đơn hàng. Vui lòng thử lại.'
     ]);
 }

@@ -415,7 +415,6 @@ async function loadOrderDetail() {
                 ? result.data.items
                 : [];
 
-
         renderOrderDetail(
             order,
             items
@@ -867,28 +866,6 @@ function formatOrderDate(
 }
 
 
-function escapeHtml(value) {
+</script>
 
-    return String(value)
-        .replace(
-            /&/g,
-            '&amp;'
-        )
-        .replace(
-            /</g,
-            '&lt;'
-        )
-        .replace(
-            />/g,
-            '&gt;'
-        )
-        .replace(
-            /"/g,
-            '&quot;'
-        )
-        .replace(
-            /'/g,
-            '&#039;'
-        );
-
-}
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

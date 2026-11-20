@@ -1,3 +1,7 @@
+/* =====================================================
+   1. CHUNG: THANH ĐIỀU HƯỚNG & NĂM HIỆN TẠI
+===================================================== */
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const menuToggle = document.getElementById('menuToggle');
@@ -37,6 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+/* =====================================================
+   2. TIỆN ÍCH CHUNG
+===================================================== */
+
 const CART_STORAGE_KEY = 'ropRengCart';
 
 function getCart() {
@@ -51,12 +59,25 @@ function getCart() {
     }
 }
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function saveCart(cart) {
     localStorage.setItem(
         CART_STORAGE_KEY,
         JSON.stringify(cart)
     );
 }
+
+/* =====================================================
+   3. GIỎ HÀNG: THÔNG BÁO & THÊM SẢN PHẨM
+===================================================== */
 
 function showCartToast(message) {
     let toast = document.getElementById('cartToast');
@@ -69,25 +90,26 @@ function showCartToast(message) {
         toast.style.right = '24px';
         toast.style.bottom = '24px';
         toast.style.zIndex = '9999';
+        toast.style.pointerEvents = 'none';
         toast.style.padding = '14px 20px';
         toast.style.borderRadius = '10px';
         toast.style.background = '#D9E75B';
         toast.style.color = '#293706';
         toast.style.fontSize = '13px';
         toast.style.fontWeight = '800';
-        toast.style.boxShadow = '0, 10px 30px rgba(0, 0, 0, 0.5)';
+        toast.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
         toast.style.opacity = '0';
-        toast.style.transform = 'translate(10px)';
-        toast.style.transition = 'all o.25s ease';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.25s ease';
 
-            document.body.appendChild(toast);
-        }
+        document.body.appendChild(toast);
+    }
 
     toast.textContent = message;
 
     requestAnimationFrame(() => {
         toast.style.opacity = '1';
-        toast.style.transform = 'translate(0)';
+        toast.style.transform = 'translateY(0)';
     });
 
     clearTimeout(toast.hidenTimer);
@@ -197,8 +219,11 @@ document.addEventListener('click', event => {
         variantName,
         price,
     });
-
 });
+
+/* =====================================================
+   4. GIỎ HÀNG: KHỞI TẠO & HIỂN THỊ
+===================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
@@ -243,7 +268,10 @@ function renderCart() {
 
     cartBody.innerHTML = cart.map(item => {
 
-        const itemTotal = item.price * item.quantity;
+        const quantity = Number(item.quantity) || 0;
+        const price = Number(item.price) || 0;
+        const cartKey = escapeHtml(item.cartKey);
+        const itemTotal = price * quantity;
 
         subtotal += itemTotal;
 
@@ -253,30 +281,30 @@ function renderCart() {
                 <div class="cart-item-info">
 
                     <h3>
-                        ${item.productName}
+                        ${escapeHtml(item.productName)}
                     </h3>
 
                     <span>
-                        ${item.variantName}
+                        ${escapeHtml(item.variantName)}
                     </span>
 
                     <strong>
-                        ${item.price.toLocaleString('vi-VN')}đ
+                        ${price.toLocaleString('vi-VN')}đ
                     </strong>
                 </div>
 
                 <div class="cart-item-note">
-                    <label for="cart-note-${item.cartKey}">
+                    <label for="cart-note-${cartKey}">
                         GHI CHÚ
                     </label>
 
                     <textarea
-                        id="cart-note-${item.cartKey}"
+                        id="cart-note-${cartKey}"
                         class="cart-note-input"
-                        data-cart-note="${item.cartKey}"
+                        data-cart-note="${cartKey}"
                         rows="2"
                         placeholder="Ví dụ: ít đá, ít ngọt,..."
-                    >${item.note || ''}</textarea>
+                    >${escapeHtml(item.note)}</textarea>
                 </div>
 
                 <div class="cart-item-quantity">
@@ -285,20 +313,20 @@ function renderCart() {
                         type="button"
                         class="cart-quantity-button"
                         data-cart-action="decrease"
-                        data-cart-key="${item.cartKey}"
+                        data-cart-key="${cartKey}"
                     >
                         −
                     </button>
 
                     <span>
-                        ${item.quantity}
+                        ${quantity}
                     </span>
 
                     <button
                         type="button"
                         class="cart-quantity-button"
                         data-cart-action="increase"
-                        data-cart-key="${item.cartKey}"
+                        data-cart-key="${cartKey}"
                     >
                         +
                     </button>
@@ -309,7 +337,7 @@ function renderCart() {
                     type="button"
                     class="cart-item-remove"
                     data-cart-action="remove"
-                    data-cart-key="${item.cartKey}"
+                    data-cart-key="${cartKey}"
                 >
                     XÓA
                 </button>
@@ -322,6 +350,10 @@ function renderCart() {
     cartSubtotal.textContent =
         `${subtotal.toLocaleString('vi-VN')}đ`;
 }
+
+/* =====================================================
+   5. GIỎ HÀNG: CẬP NHẬT & GHI CHÚ
+===================================================== */
 
 function updateCartItemQuantity(cartKey, action) {
 
@@ -412,10 +444,15 @@ document.addEventListener('input', event => {
     saveCart(cart);
 });
 
+/* =====================================================
+   6. GIỎ HÀNG: DRAWER
+===================================================== */
+
 const cartToggle = document.getElementById('cartToggle');
 const cartDrawer = document.getElementById('cartDrawer');
 const cartClose = document.getElementById('cartClose');
 const cartOverlay = document.getElementById('cartOverlay');
+const cartCheckout = document.getElementById('cartCheckout');
 
 function openCartDrawer() {
 
@@ -453,13 +490,20 @@ cartClose?.addEventListener('click', closeCartDrawer);
 
 cartOverlay?.addEventListener('click', closeCartDrawer);
 
+cartCheckout?.addEventListener('click', () => {
+    window.location.href = 'checkout.php';
+});
+
 document.addEventListener('keydown', event => {
 
     if (event.key === 'Escape') {
         closeCartDrawer();
     }
-
 });
+
+/* =====================================================
+   7. THANH TOÁN
+===================================================== */
 
 function renderCheckout() {
     const checkoutItems = document.getElementById('checkoutOrderItems');
@@ -494,7 +538,9 @@ function renderCheckout() {
     let total = 0;
 
     checkoutItems.innerHTML = cart.map(item => {
-        const itemTotal = item.price * item.quantity;
+        const quantity = Number(item.quantity) || 0;
+        const price = Number(item.price) || 0;
+        const itemTotal = price * quantity;
 
         total += itemTotal;
 
@@ -502,23 +548,23 @@ function renderCheckout() {
             <article class="checkout-order-item">
 
                 <div class="checkout-order-item-info">
-                    <h3>${item.productName}</h3>
+                    <h3>${escapeHtml(item.productName)}</h3>
 
                     <span>
-                        ${item.variantName}
-                        · SL ${item.quantity}
+                        ${escapeHtml(item.variantName)}
+                        · SL ${quantity}
                     </span>
 
                     ${
                         item.note
-                            ? `<span>Ghi chú: ${item.note}</span>`
+                            ? `<span>Ghi chú: ${escapeHtml(item.note)}</span>`
                             : ''
                     }
                 </div>
 
                 <div class="checkout-order-item-meta">
                     <span>
-                        ${item.price.toLocaleString('vi-VN')}đ
+                        ${price.toLocaleString('vi-VN')}đ
                     </span>
 
                     <strong>
@@ -589,6 +635,11 @@ async function submitOrder() {
             );
         }
 
+        saveCart([]);
+        updateCartCount();
+        renderCheckout();
+        renderCart();
+
         console.log(
             'Order created:',
             result.data
@@ -597,6 +648,10 @@ async function submitOrder() {
         alert(
             `Tạo đơn thành công!\nMã đơn: ${result.data.order_code}`
         );
+
+        setTimeout(() => {
+            window.location.href = 'index.php'
+        }, 500);
 
     } catch (error) {
 
@@ -631,6 +686,10 @@ document.addEventListener('click', event => {
 
     submitOrder();
 });
+
+/* =====================================================
+   8. QUẢN TRỊ: DANH SÁCH ĐƠN HÀNG
+===================================================== */
 
 async function loadAdminOrders() {
 
@@ -712,15 +771,16 @@ async function loadAdminOrders() {
                         
                             <td>
                                 <span class="admin-order-code">
-                                    ${order.order_code}
+                                    ${escapeHtml(order.order_code)}
                                 </span>
                             </td>
 
                             <td>
                                 <span class="admin-order-customer">
                                     ${
-                                        order.customer_name ||
-                                        '—'
+                                        escapeHtml(
+                                            order.customer_name || '—'
+                                        )
                                     }
                                 </span>
                             </td>
@@ -736,17 +796,17 @@ async function loadAdminOrders() {
                             
                             <td>
                                 <span class="admin-order-status">
-                                    ${getOrderStatusLabel(
-                                        order.status
-                                    )}
+                                ${escapeHtml(getOrderStatusLabel(
+                                    order.status
+                                ))}
                                 </span>
                             </td>
                             
                             <td>
                                 <span class="admin-order-date">
-                                    ${formatOrderDate(
+                                    ${escapeHtml(formatOrderDate(
                                         order.created_at
-                                    )}
+                                    ))}
                                 </span>
                             </td>
                             
@@ -754,7 +814,7 @@ async function loadAdminOrders() {
                                 <button
                                     type="button"
                                     class="admin-order-view"
-                                    data-order-id="${order.id}"
+                                    data-order-id="${escapeHtml(order.id)}"
                                 >
                                     XEM
                                 </button>
@@ -820,6 +880,10 @@ function formatOrderDate(dateString) {
         }
     );
 }
+
+/* =====================================================
+   9. QUẢN TRỊ: CHUYỂN TRANG & CẬP NHẬT TRẠNG THÁI
+===================================================== */
 
 document.addEventListener(
     'click',
@@ -894,13 +958,14 @@ async function updateOrderStatus() {
         return;
     }
 
+    updateButton.disabled = true;
     updateButton.innerHTML =
         'ĐANG CẬP NHẬT...';
 
     try {
 
         const response = await fetch(
-            '../api/update-order-status.php',
+            'api/update-order-status.php',
             {
                 method: 'POST',
 
@@ -910,7 +975,7 @@ async function updateOrderStatus() {
 
                 body: JSON.stringify({
                     order_id: Number(orderId),
-                    status: statucs
+                    status: status
                 })
             }
         );
@@ -971,5 +1036,466 @@ document.addEventListener(
         }
 
         updateOrderStatus();
+    }
+);
+
+async function loadAdminDashboardStats() {
+
+    const dashboard =
+        document.querySelector('.admin-dashboard-grid');
+
+    if (!dashboard) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            'api/dashboard-stats.php'
+        );
+
+        const result = await response.json();
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+            throw new Error(
+                result.message ||
+                'Không thể tải thống kê.'
+            );
+        }
+
+        const stats = result.data;
+
+        const setText = (id, value) => {
+
+            const element =
+                document.getElementById(id);
+
+            if (element) {
+                element.textContent = value;
+            }
+        };
+
+        const formatNumber = value => {
+            return Number(value || 0)
+                .toLocaleString('vi-VN');
+        };
+
+        const formatCurrency = value => {
+            return `${formatNumber(value)}đ`;
+        };
+
+        setText(
+            'dashboardTotalOrders',
+            formatNumber(stats.orders.total)
+        );
+
+        setText(
+            'dashboardPendingOrders',
+            formatNumber(stats.orders.pending)
+        );
+
+        setText(
+            'dashboardConfirmedOrders',
+            formatNumber(stats.orders.confirmed)
+        );
+
+        setText(
+            'dashboardCompletedOrders',
+            formatNumber(stats.orders.completed)
+        );
+
+        setText(
+            'dashboardCancelledOrders',
+            formatNumber(stats.orders.cancelled)
+        );
+
+        setText(
+            'dashboardTodayRevenue',
+            formatCurrency(stats.revenue.today)
+        );
+
+        setText(
+            'dashboardMonthRevenue',
+            formatCurrency(stats.revenue.month)
+        );
+
+        setText(
+            'dashboardTotalRevenue',
+            formatCurrency(stats.revenue.total)
+        );
+
+        setText(
+            'dashboardTotalProducts',
+            formatNumber(stats.products.total)
+        );
+
+        setText(
+            'dashboardActiveProducts',
+            formatNumber(stats.products.active)
+        );
+
+        setText(
+            'dashboardInactiveProducts',
+            formatNumber(stats.products.inactive)
+        );
+
+    } catch (error) {
+
+        console.error(
+            'load dashboard stats error:',
+            error
+        );
+
+    }
+}
+
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        if (
+            document.querySelector(
+                '.admin-dashboard-grid'
+            )
+        ) {
+            loadAdminDashboardStats();
+        }
+
+    }
+);
+
+async function loadAdminProducts() {
+
+    const tableWrapper =
+        document.getElementById(
+            'adminProductsTableWrapper'
+        );
+
+    const productCount =
+        document.getElementById(
+            'adminProductCount'
+        );
+
+    if (!tableWrapper) {
+        return;
+    }
+
+    tableWrapper.innerHTML = `
+        <div class="admin-loading">
+            ĐANG TẢI SẢN PHẨM...
+        </div>
+    `;
+
+    try {
+
+        const response = await fetch(
+            'api/admin-products.php'
+        );
+
+        const result =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+            throw new Error(
+                result.message ||
+                'Không thể tải sản phẩm.'
+            );
+        }
+
+        const products =
+            Array.isArray(result.data)
+                ? result.data
+                : [];
+
+        if (productCount) {
+
+            productCount.textContent =
+                products.length;
+        }
+
+        if (products.length === 0) {
+
+            tableWrapper.innerHTML = `
+                <div class="admin-empty">
+                    CHƯA CÓ SẢN PHẨM
+                </div>
+            `;
+
+            return;
+        }
+
+        tableWrapper.innerHTML = `
+            <table class="admin-products-table">
+            
+                <thead>
+                
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>SẢN PHẨM</th>
+                        <th>DANH MỤC</th>
+                        <th>GIÁ</th>
+                        <th>SIZE</th>
+                        <th>TRẠNG THÁI</th>
+                        <th>NHÃN</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    ${products.map(product => {
+
+                        const variants =
+                            Array.isArray(product.variants)
+                                ? product.variants
+                                : [];
+
+                        const activeVariants =
+                            variants.filter(
+                                variant =>
+                                    Number(
+                                        variant.is_active
+                                    ) === 1
+                            );
+
+                        const variantHtml =
+                            activeVariants.length > 0
+                                ? `
+                                    <div class="admin-product-variants">
+                                    
+                                        ${
+                                            activeVariants
+                                                .map(variant => `
+                                                    <span class="admin-product-variant">
+                                                    
+                                                        <span>
+                                                            ${escapeHtml(
+                                                                variant.name
+                                                            )}
+                                                        </span>
+                                                        
+                                                        <strong>
+                                                            ${Number(
+                                                                variant.price
+                                                            ).toLocaleString(
+                                                                'vi-VN'
+                                                            )}đ
+                                                        </strong>
+                                                        
+                                                    </span>
+                                                `)
+                                                .join('')
+                                        }
+                                        
+                                    </div>
+                                `
+                                : '-';
+
+                        const flags = [];
+
+                        if (
+                            Number(
+                                product.is_best_seller
+                            ) === 1
+                        ) {
+                            flags.push(
+                                'BEST SELLER'
+                            );
+                        }
+
+                        if (
+                            Number(
+                                product.is_new
+                            ) === 1
+                        ) {
+                            flags.push(
+                                'MỚI'
+                            );
+                        }
+
+                        if (
+                            Number(
+                                product.is_seasonal
+                            ) === 1
+                        ) {
+                            flags.push(
+                                'SẢN PHẨM MÙA'
+                            );
+                        }
+
+                        const flagsHtml =
+                            flags.length > 0
+                                ? `
+                                    <div class="admin-product-flags">
+                                    
+                                        ${
+                                            flags
+                                                .map(flag => `
+                                                    <span class="admin-product-flag">
+                                                        ${escapeHtml(flag)}
+                                                    </span>
+                                                `)
+                                                .join('')
+                                        }
+                                        
+                                    </div>
+                                `
+                                : '-';
+
+                        const imageHtml =
+                            product.image
+                                ? `
+                                    <div class="admin-product-image">
+                                    
+                                        <img
+                                            src="${escapeHtml(
+                                                product.image
+                                            )}"
+                                            alt="${escapeHtml(
+                                                product.name
+                                            )}"
+                                            loading="lazy"
+                                        >
+                                        
+                                    </div>
+                                `
+                                : `
+                                    <div class="admin-product-image">
+                                    
+                                        <div class="admin-product-image-placeholder">
+                                            RỐP RẺNG
+                                        </div>
+                                        
+                                    </div>
+                                `;
+
+                        const statusHtml =
+                            Number(
+                                product.is_active
+                            ) === 1
+                                ? `
+                                    <span class="admin-product-status admin-product-status-active">
+                                        ĐANG BÁN
+                                    </span>
+                                `
+                                : `
+                                    <span class="admin-product-status admin-product-status-inactive">
+                                        ĐANG ẨN
+                                    </span>
+                                `;
+
+                        return `
+                            <tr>
+                            
+                                <td>
+                                    ${imageHtml}
+                                </td>
+                                
+                                <td>
+                                
+                                    <div class="admin-product-name">
+                                        ${escapeHtml(
+                                            product.name
+                                        )}
+                                    </div>
+                                    
+                                </td>
+                                
+                                <td>
+                                
+                                    <span class="admin-product-category">
+                                        ${escapeHtml(
+                                            product.category_name
+                                        )}
+                                    </span>
+                                    
+                                </td>
+                                
+                                <td>
+                                
+                                    <span class="admin-product-price">
+                                        ${Number(
+                                            product.price
+                                        ).toLocaleString(
+                                            'vi-VN'
+                                        )}đ
+                                    </span>
+                                    
+                                </td>
+                                
+                                <td>
+                                    ${variantHtml}
+                                </td>
+                                
+                                <td>
+                                    ${statusHtml}
+                                </td>
+                                
+                                <td>
+                                    ${flagsHtml}
+                                </td>
+                                
+                            </tr>
+                        `;
+
+                    }).join('')}
+
+                </tbody>
+
+            </table>
+        `;
+                        
+    } catch (error) {
+
+        console.error(
+            'Load admin products error:',
+            error
+        );
+
+        tableWrapper.innerHTML = `
+            <div class="admin-error">
+                KHÔNG THỂ TẢI DANH SÁCH SẢN PHẨM
+            </div>
+        `;
+
+    }
+}
+
+document.addEventListener(
+    'click',
+    event => {
+
+        const refreshButton =
+            event.target.closest(
+                '#adminProductRefresh'
+            );
+
+        if (!refreshButton) {
+            return;
+        }
+
+        loadAdminProducts();
+
+    }
+);
+
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        if (
+            document.getElementById(
+                'adminProductsTableWrapper'
+            )
+        ) {
+            loadAdminProducts();
+        }
+
     }
 );

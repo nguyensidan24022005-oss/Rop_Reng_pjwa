@@ -71,7 +71,16 @@ $productQuery = $pdo->query(
         ON c.id = p.category_id
     WHERE p.is_active = 1
         AND c.is_active = 1
-    ORDER BY p.id ASC"
+        AND (
+            p.is_best_seller = 1
+            OR p.is_new = 1
+            OR (
+                p.is_seasonal = 1
+                AND (p.season_start IS NULL OR p.season_start <= CURRENT_DATE())
+                AND (p.season_end IS NULL OR p.season_end >= CURRENT_DATE())
+            )
+        )
+    ORDER BY p.is_best_seller DESC, p.is_new DESC, p.id ASC"
 );
 
 $products = $productQuery->fetchAll();
@@ -169,7 +178,7 @@ $products = $productQuery->fetchAll();
             <div class="section-heading">
 
                 <div>
-                    <span class="section-heading">
+                    <span class="section-eyebrow">
                         OUR PICKS
                     </span>
 
@@ -186,6 +195,12 @@ $products = $productQuery->fetchAll();
             </div>
 
             <div class="product-grid">
+
+                <?php if (empty($products)): ?>
+                    <p class="product-empty">
+                        Hiện chưa có món nổi bật.
+                    </p>
+                <?php endif; ?>
 
                 <?php foreach ($products as $product): ?>
 

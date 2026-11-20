@@ -43,7 +43,7 @@ require_once __DIR__ . '/../includes/header.php';
 
                 <button
                     type="button"
-                    class="admin-refesh-button"
+                    class="admin-refresh-button"
                     id="adminOrdersRefresh"
                 >
                     ↻ LÀM MỚI

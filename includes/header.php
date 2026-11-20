@@ -29,13 +29,16 @@ if (!isset($pageTitle)) {
 
     <link rel="stylesheet" href="assets/css/style.css?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
 
-    <link rel="stylesheet" href="assets/css/homepage.css">
+    <link rel="stylesheet" href="assets/css/homepage.css?v=<?= filemtime(__DIR__ . '/../assets/css/homepage.css') ?>">
 
     <link rel="stylesheet" href="assets/css/menu.css">
 
     <link rel="stylesheet" href="assets/css/checkout.css?v=<?= filemtime(__DIR__ . '/../assets/css/checkout.css') ?>">
 
-    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="stylesheet" href="assets/css/admin.css?v=<?= filemtime(__DIR__ . '/../assets/css/admin.css') ?>">
+
+</head>
+
 <body>
     
     <?php require_once __DIR__ . '/navbar.php'; ?>
