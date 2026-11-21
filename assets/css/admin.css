@@ -1013,6 +1013,10 @@
     gap: 8px;
 }
 
+.admin-form-group[hidden] {
+    display: none !important;
+}
+
 .admin-form-group label {
     font-weight: 600;
 }

@@ -1498,6 +1498,18 @@ function openAdminProductEditModal(product) {
         'adminEditProductPrice'
     );
 
+    const variantTypeInput = document.getElementById(
+        'adminEditVariantType'
+    );
+
+    const priceMInput = document.getElementById(
+        'adminEditPriceM'
+    );
+
+    const priceLInput = document.getElementById(
+        'adminEditPriceL'
+    );
+
     const typeInput = document.getElementById(
         'adminEditProductType'
     );
@@ -1511,18 +1523,71 @@ function openAdminProductEditModal(product) {
         !idInput ||
         !nameInput ||
         !priceInput ||
+        !variantTypeInput ||
+        !priceMInput ||
+        !priceLInput ||
         !typeInput ||
         !activeInput
     ) {
         console.error(
-            'Không tìm thấy Product Edit Modal.'
+            'Không tìm thấy Product Edit Modal hoặc các trường Variant.'
         );
         return;
     }
 
     idInput.value = product.id ?? '';
     nameInput.value = product.name ?? '';
+
     priceInput.value = product.price ?? '';
+    priceMInput.value = '';
+    priceLInput.value = '';
+
+    const activeVariants = Array.isArray(product.variants)
+        ? product.variants.filter(
+            variant => Number(variant.is_active) === 1
+        )
+        : [];
+
+    const defaultVariant = activeVariants.find(
+        variant => variant.name === 'Default'
+    );
+
+    const mVariant = activeVariants.find(
+        variant => variant.name === 'M'
+    );
+
+    const lVariant = activeVariants.find(
+        variant => variant.name === 'L'
+    );
+
+    if (
+        activeVariants.length === 1 &&
+        defaultVariant
+    ) {
+        variantTypeInput.value = 'default'
+        priceInput.value = defaultVariant.price;
+    } else if (
+        activeVariants.length === 2 &&
+        mVariant &&
+        lVariant
+    ) {
+        variantTypeInput.value = 'size'
+
+        priceMInput.value = mVariant.price;
+        priceLInput.value = lVariant.price;
+    } else {
+        console.error(
+            'Cấu trúc variant không hợp lệ:',
+            product
+        );
+        alert(
+            'Sản phẩm có nhóm phân loại không hợp lệ. Vui lòng kiểm tra dữ liệu.'
+        );
+        return;
+    }
+
+    syncAdminProductEditVariant();
+
     activeInput.value =
         Number(product.is_active) === 1
             ? '1'
@@ -1624,10 +1689,71 @@ function syncAdminProductEditType() {
     seasonEndGroup.hidden = !isSeason;
 }
 
+function syncAdminProductEditVariant() {
+    const variantTypeInput = document.getElementById(
+        'adminEditVariantType'
+    );
+
+    const defaultGroup = document.getElementById(
+        'adminEditDefaultPriceGroup'
+    );
+
+    const priceMGroup = document.getElementById(
+        'adminEditPriceMGroup'
+    );
+
+    const priceLGroup = document.getElementById(
+        'adminEditPriceLGroup'
+    );
+
+    const defaultPriceInput = document.getElementById(
+        'adminEditProductPrice'
+    );
+
+    const priceMInput = document.getElementById(
+        'adminEditPriceM'
+    );
+
+    const priceLInput = document.getElementById(
+        'adminEditPriceL'
+    );
+    if (
+        !variantTypeInput ||
+        !defaultGroup ||
+        !priceMGroup ||
+        !priceLGroup ||
+        !defaultPriceInput ||
+        !priceMInput ||
+        !priceLInput
+    ) {
+        return;
+    }
+    const isSize = variantTypeInput.value === 'size';
+
+    defaultGroup.hidden = isSize;
+    priceMGroup.hidden = !isSize;
+    priceLGroup.hidden = !isSize;
+
+    defaultPriceInput.required = !isSize;
+    priceMInput.required = isSize;
+    priceLInput.required = isSize;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const typeInput = document.getElementById(
         'adminEditProductType'
     );
+
+    const variantTypeInput = document.getElementById(
+        'adminEditVariantType'
+    );
+
+    if (variantTypeInput) {
+        variantTypeInput.addEventListener(
+            'change',
+            syncAdminProductEditVariant
+        );
+    }
 
     const closeButton = document.getElementById(
         'adminProductEditClose'
@@ -1701,6 +1827,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     'adminEditProductPrice'
                 );
 
+                const variantTypeInput = document.getElementById(
+                    'adminEditVariantType'
+                );
+
+                const priceMInput = document.getElementById(
+                    'adminEditPriceM'
+                );
+
+                const priceLInput = document.getElementById(
+                    'adminEditPriceL'
+                );
+
                 const typeInput = document.getElementById(
                     'adminEditProductType'
                 );
@@ -1726,15 +1864,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         'button[type="submit"]'
                     );
 
-                const isSeason =
-                    typeInput.value === 'season';
+                const isSeason = typeInput.value === 'season';
+                const isSize = variantTypeInput.value === 'size';
+
+                const price = isSize
+                    ? Number(priceMInput.value)
+                    : Number(priceInput.value);
 
                 const payload = {
                     id: Number(idInput.value),
                     name: nameInput.value.trim(),
-                    price: Number(priceInput.value),
+
+                    price: price,
+                    variant_type: isSize ? 'size' : 'default',
+
+                    ...(isSize
+                        ? {
+                            price_m: Number(priceMInput.value),
+                            price_l: Number(priceLInput.value)
+                        }
+                        : {}
+                    ),
+
                     is_active: Number(activeInput.value),
                     is_seasonal: isSeason ? 1 : 0,
+
                     category_id: isSeason
                         ? null
                         : (
@@ -1742,24 +1896,35 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ? Number(categoryInput.value)
                                 : null
                         ),
+
                     season_start: isSeason
-                        ? (
-                            seasonStartInput.value || null
-                        )
+                        ? (seasonStartInput.value || null)
                         : null,
+
                     season_end: isSeason
-                        ? (
-                            seasonEndInput.value || null
-                        )
+                        ? (seasonEndInput.value || null)
                         : null
                 };
+
+                const validPrices = isSize
+                    ? (
+                        Number.isFinite(payload.price_m) &&
+                        Number.isFinite(payload.price_l) &&
+                        payload.price_m > 0 &&
+                        payload.price_l > 0
+                    )
+                    : (
+                        Number.isFinite(payload.price) &&
+                        payload.price > 0
+                    );
+
                 if (
                     !payload.id ||
                     !payload.name ||
-                    payload.price < 0
+                    !validPrices
                 ) {
                     alert(
-                        'Vui lòng kiểm tra lại thông tin sản phẩm.'
+                        'Vui lòng kiểm tra tên sản phẩm và giá biến thể.'
                     );
                     return;
                 }

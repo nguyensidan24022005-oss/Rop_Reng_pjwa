@@ -136,18 +136,64 @@ require_once __DIR__ . '/../includes/header.php';
                     >
                 </div>
 
-                <div class="admin-form-group">
-                    <label for="adminEditProductPrice">
-                        Giá
+                <div class="admim-form-group">
+                    <label for="adminEditVariantType">
+                        Nhóm phân loại
                     </label>
-
+                    <select 
+                        name="variant_type" 
+                        id="adminEditVariantType"
+                        required
+                    >
+                        <option value="default">Default</option>
+                        <option value="size">M / L</option>
+                    </select>
+                </div>
+                <div
+                    class="admin-form-group"
+                    id="adminEditDefaultPriceGroup"
+                >
+                    <label for="adminEditProductPrice">
+                        Giá Default (VNĐ)
+                    </label>
                     <input 
-                        type="number"
-                        id="adminEditProductPrice"
-                        name="price"
+                        type="number" 
+                        name="price" 
+                        id="adminEditProductPrice" 
                         min="0"
                         step="1000"
-                        required
+                    >
+                </div>
+                <div
+                    class="admin-form-group"
+                    id="adminEditPriceMGroup"
+                    hidden
+                >
+                    <label for="adminEditPriceM">
+                        Giá size M (VNĐ)
+                    </label>
+                    <input 
+                        type="number"
+                        id="adminEditPriceM"
+                        name="price_m"
+                        min="0"
+                        step="1000"
+                    >
+                </div>
+                <div
+                    class="admin-form-group"
+                    id="adminEditPriceLGroup"
+                    hidden
+                >
+                    <label for="adminEditPriceL">
+                        Giá size L (VNĐ)
+                    </label>
+                    <input 
+                        type="number"
+                        id="adminEditPriceL"
+                        name="price_l"
+                        min="0"
+                        step="1000"
                     >
                 </div>
 
@@ -242,7 +288,7 @@ require_once __DIR__ . '/../includes/header.php';
 
             </div>
 
-            <div class="admin-form-action">
+            <div class="admin-form-actions">
                 <button
                     type="button"
                     class="admin-button-secondary"
