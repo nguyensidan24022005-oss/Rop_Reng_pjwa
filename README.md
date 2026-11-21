@@ -552,7 +552,7 @@ Schema nền tảng:
 ```sql
 CREATE TABLE products (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    category_id INT UNSIGNED NOT NULL,
+    category_id INT UNSIGNED DEFAULT NULL,
     name VARCHAR(150) NOT NULL,
     description TEXT DEFAULT NULL,
     price DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -571,6 +571,38 @@ CREATE TABLE products (
         ON DELETE RESTRICT
 );
 ```
+
+## Quy tắc phân loại sản phẩm V1
+
+### DRINKS
+
+- `is_seasonal = 0`
+- `category_id` bắt buộc có giá trị.
+- `season_start = NULL`.
+- `season_end = NULL`.
+- Sản phẩm thuộc một trong 7 category cố định.
+
+### SEASON PRODUCTS
+
+- `is_seasonal = 1`.
+- `category_id = NULL`.
+- `season_start` bắt buộc có giá trị.
+- `season_end` bắt buộc có giá trị.
+- `season_start <= season_end`.
+- Chỉ được hiển thị và kinh doanh trong khoảng ngày đã thiết lập.
+
+### TOPPINGS
+
+- Topping là add-on, không phải category sản phẩm.
+- Không đưa Topping vào bảng `categories` như một danh mục đồ uống.
+- Quản lý và lựa chọn topping thuộc phạm vi V2.
+
+### Nguyên tắc dữ liệu
+
+- Không cho phép DRINKS thiếu category.
+- Không cho phép SEASON PRODUCTS có category.
+- Không cho phép sản phẩm có ngày mùa vụ không hợp lệ.
+- API phải kiểm tra dữ liệu ở server-side.
 
 Không tự tạo description giả cho sản phẩm nếu chưa có dữ liệu.
 
@@ -601,6 +633,26 @@ ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_unicode_ci;
 ```
+
+## Quy tắc Product Variants V1
+
+Mỗi sản phẩm phải có một trong hai cấu trúc:
+
+### Default
+
+- Có đúng một variant tên `Default`.
+- Giá variant bằng `products.price`.
+
+### M/L
+
+- Có đúng hai variant tên `M` và `L`.
+- `products.price` bằng giá variant `M`.
+- Giá variant `L` được lưu riêng.
+
+Không cho phép một sản phẩm đồng thời có `Default` và `M/L`.
+Không cho phép trùng tên variant trong cùng một sản phẩm.
+
+Giá sử dụng khi đặt hàng phải được lấy từ variant hợp lệ.
 
 ---
 

@@ -34,21 +34,47 @@ try {
 
     $name = $readString('name');
     $description = $readString('description');
-    $categoryId = filter_var(
-        $_POST['category_id'] ?? null,
-        FILTER_VALIDATE_INT
-    );
+
+    $categoryRaw = $readString('category_id');
+
     $variantType = $readString('variant_type');
+
     $seasonStart = $readString('season_start');
     $seasonEnd = $readString('season_end');
 
     $bestSeller = isset($_POST['is_best_seller']) ? 1 : 0;
     $isNew = isset($_POST['is_new']) ? 1 : 0;
-    $isSeasonal = isset($_POST['is_seasonal']) ? 1 : 0;
 
-    if ($categoryId === false || $categoryId <= 0) {
+    $isSeasonalRaw = $readString('is_seasonal');
+
+    if ($isSeasonalRaw === '' || $isSeasonalRaw === '0') {
+        $isSeasonal = 0;
+    } elseif (
+        $isSeasonalRaw === '1' ||
+        $isSeasonalRaw === 'on'
+    ) {
+        $isSeasonal = 1;
+    } else {
         throw new InvalidArgumentException(
-            'Vui lòng chọn danh mục hợp lệ.'
+            'Loại sản phẩm không hợp lệ.'
+        );
+    }
+
+    $categoryId = null;
+
+    if ($isSeasonal === 0) {
+        $categoryId = filter_var(
+            $categoryRaw,
+            FILTER_VALIDATE_INT
+        );
+        if ($categoryId === false || $categoryId <= 0) {
+            throw new InvalidArgumentException(
+                'DRINKS phải có danh mục hợp lệ.'
+            );
+        }
+    } elseif ($categoryRaw !== '') {
+        throw new InvalidArgumentException(
+            'SEASON PRODUCT không được có danh mục.'
         );
     }
 
@@ -166,15 +192,18 @@ try {
         return $value;
     };
 
-    if ($isSeasonal) {
+    if ($isSeasonal === 1) {
         $seasonStart = $normalizeDate($seasonStart);
         $seasonEnd = $normalizeDate($seasonEnd);
-
         if (
-            $seasonStart !== null &&
-            $seasonEnd !== null &&
-            $seasonStart > $seasonEnd
+            $seasonStart === null ||
+            $seasonEnd === null
         ) {
+            throw new InvalidArgumentException(
+                'Season Product phải có ngày bắt đầu và ngày kết thúc.'
+            );
+        }
+        if ($seasonStart > $seasonEnd) {
             throw new InvalidArgumentException(
                 'Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.'
             );
@@ -186,24 +215,24 @@ try {
 
     $uploadedFilePath = null;
 
-    $categoryQuery = $pdo->prepare(
-        "SELECT id, slug
-        FROM categories
-        WHERE id = :id
-            AND is_active = 1
-        LIMIT 1"
-    );
-
-    $categoryQuery->execute([
-        'id' => $categoryId
-    ]);
-
-    $category = $categoryQuery->fetch();
-
-    if (!$category) {
-        throw new InvalidArgumentException(
-            'Danh mục không tồn tại hoặc bị ẩn.'
+    $category = null;
+    if ($isSeasonal === 0) {
+        $categoryQuery = $pdo->prepare(
+            "SELECT id, slug
+            FROM categories
+            WHERE id = :id
+                AND is_active = 1
+            LIMIT 1"
         );
+        $categoryQuery->execute([
+            'id' => $categoryId
+        ]);
+        $category = $categoryQuery->fetch();
+        if (!$category) {
+            throw new InvalidArgumentException(
+                'Danh mục không tồn tại hoặc bị ẩn.'
+            );
+        }
     }
 
     $imagePath = null;
@@ -257,18 +286,32 @@ try {
                 );
             }
 
-            $categorySlug = $category['slug'];
+            if ($isSeasonal === 1) {
+                $uploadDirectory =
+                    __DIR__
+                    . '/../assets/images/products/season_products';
 
-            if (!preg_match('/\A[a-z0-9_-]+\z/i', $categorySlug)) {
-                throw new RuntimeException(
-                'Danh mục có mã đường dẫn không hợp lệ.'
-                );
+                $imageBasePath =
+                    'assets/images/products/season_products/';
+            } else {
+                $categorySlug = $category['slug'];
+
+                if (!preg_match('/\A[a-z0-9_-]+\z/i', $categorySlug)) {
+                    throw new RuntimeException(
+                        'Danh mục có mã đường dẫn không hợp lệ.'
+                    );
+                }
+
+                $uploadDirectory =
+                    __DIR__
+                    . '/../assets/images/products/drinks/'
+                    . $categorySlug;
+
+                $imageBasePath =
+                    'assets/images/products/drinks/'
+                    . $categorySlug
+                    . '/';
             }
-
-            $uploadDirectory =
-                __DIR__
-                . '/../assets/images/products/drinks/'
-                . $categorySlug;
 
             if (
                 !is_dir($uploadDirectory) &&
@@ -299,11 +342,7 @@ try {
                 );
             }
 
-            $imagePath =
-                'assets/images/products/drinks/'
-                . $categorySlug
-                . '/'
-                . $filename;
+            $imagePath = $imageBasePath . $filename;
         }
     }
 
@@ -337,18 +376,55 @@ try {
         )"
     );
 
-    $productInsert->execute([
-        'category_id' => $categoryId,
-        'name' => $name,
-        'description' => $description !== '' ? $description : null,
-        'price' => $price,
-        'image' => $imagePath,
-        'is_best_seller' => $bestSeller,
-        'is_new' => $isNew,
-        'is_seasonal' => $isSeasonal,
-        'season_start' => $seasonStart,
-        'season_end' => $seasonEnd
-    ]);
+    $productInsert->bindValue(
+        ':category_id',
+        $categoryId,
+        $categoryId === null
+            ? PDO::PARAM_NULL
+            : PDO::PARAM_INT
+    );
+    $productInsert->bindValue(
+        ':name',
+        $name,
+        PDO::PARAM_STR
+    );
+    $productInsert->bindValue(
+        ':description',
+        $description !== '' ? $description : null,
+        $description !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL
+    );
+    $productInsert->bindValue(':price', $price);
+    $productInsert->bindValue(
+        ':image',
+        $imagePath,
+        $imagePath === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+    );
+    $productInsert->bindValue(
+        ':is_best_seller',
+        $bestSeller,
+        PDO::PARAM_INT
+    );
+    $productInsert->bindValue(
+        ':is_new',
+        $isNew,
+        PDO::PARAM_INT
+    );
+    $productInsert->bindValue(
+        ':is_seasonal',
+        $isSeasonal,
+        PDO::PARAM_INT
+    );
+    $productInsert->bindValue(
+        ':season_start',
+        $seasonStart,
+        $seasonStart === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+    );
+    $productInsert->bindValue(
+        ':season_end',
+        $seasonEnd,
+        $seasonEnd === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+    );
+    $productInsert->execute();
 
     $productId = (int) $pdo->lastInsertId();
 
