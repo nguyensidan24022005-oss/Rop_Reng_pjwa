@@ -1,3 +1,4 @@
+
 <?php
 
 header('Content-Type: application/json; charset=utf-8');
@@ -5,244 +6,502 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../config/db.php';
 
 try {
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Method not allowed'
-    ]);
-    exit;
-}
-
-$input = json_decode(file_get_contents('php://input'), true);
-
-if (!is_array($input)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid JSON body'
-    ]);
-    exit;
-}
-
-$id = isset($input['id']) ? (int)$input['id'] : 0;
-$name = trim($input['name'] ?? '');
-$description = $input['description'] ?? null;
-$price = isset($input['price']) ? (float)$input['price'] : 0;
-$image = $input['image'] ?? null;
-$is_active = isset($input['is_active']) ? (int)$input['is_active'] : 1;
-
-if (
-    ($description !== null && !is_string($description)) ||
-    ($image !== null && !is_string($image))
-) {
-    http_response_code(422);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid product data'
-    ]);
-    exit;
-}
-
-$description = $description !== null
-    ? trim($description)
-    : null;
-
-$image = $image !== null
-    ? trim($image)
-    : null;
-
-$is_seasonal = isset($input['is_seasonal'])
-    ? (int)$input['is_seasonal']
-    : 0;
-
-$category_id = isset($input['category_id']) && $input['category_id'] !== ''
-    ? (int)$input['category_id']
-    : null;
-
-$season_start = !empty($input['season_start'])
-    ? $input['season_start']
-    : null;
-
-$season_end = !empty($input['season_end'])
-    ? $input['season_end']
-    : null;
-
-if ($id <= 0) {
-    http_response_code(422);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid product ID'
-    ]);
-    exit;
-}
-
-if ($name === '') {
-    http_response_code(422);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Product name is required'
-    ]);
-    exit;
-}
-
-if ($price < 0) {
-    http_response_code(422);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Price must be greater than or equal to 0'
-    ]);
-    exit;
-}
-
-if ($is_seasonal === 1) {
-
-    if ($category_id !== null) {
-        http_response_code(422);
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
         echo json_encode([
             'success' => false,
-            'message' => 'Season product must not have a category'
+            'message' => 'Method not allowed.'
         ]);
         exit;
     }
 
-    if ($season_start === null || $season_end === null) {
-        http_response_code(422);
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    if (!is_array($input)) {
+        http_response_code(400);
         echo json_encode([
             'success' => false,
-            'message' => 'Season product requires season start and end dates'
+            'message' => 'Invalid JSON body.'
         ]);
         exit;
     }
 
-    if ($season_start > $season_end) {
-        http_response_code(422);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Season start date must be before or equal to season end date'
-        ]);
-        exit;
+    $readString = static function (string $key) use ($input): string {
+        $value = $input[$key] ?? '';
+
+        if (!is_string($value) && !is_numeric($value)) {
+            throw new InvalidArgumentException(
+                'Dữ liệu sản phẩm không hợp lệ.'
+            );
+        }
+
+        return trim((string) $value);
+    };
+
+    $readPrice = static function ($value, string $label): string {
+        if (!is_numeric($value)) {
+            throw new InvalidArgumentException(
+                $label . ' không hợp lệ.'
+            );
+        }
+
+        $number = (float) $value;
+
+        if (
+            !is_finite($number) ||
+            $number <= 0 ||
+            $number > 99999999.99
+        ) {
+            throw new InvalidArgumentException(
+                $label . ' phải lớn hơn 0 và không vượt quá giới hạn.'
+            );
+        }
+
+        return number_format($number, 2, '.', '');
+    };
+
+    $readFlag = static function ($value, string $label): int {
+        $flag = filter_var($value, FILTER_VALIDATE_INT);
+
+        if ($flag === false || !in_array($flag, [0, 1], true)) {
+            throw new InvalidArgumentException(
+                $label . ' không hợp lệ.'
+            );
+        }
+
+        return $flag;
+    };
+
+    $normalizeDate = static function ($value): ?string {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (!is_string($value)) {
+            throw new InvalidArgumentException(
+                'Ngày sản phẩm mùa vụ không hợp lệ.'
+            );
+        }
+
+        $date = DateTime::createFromFormat('!Y-m-d', $value);
+
+        if (!$date || $date->format('Y-m-d') !== $value) {
+            throw new InvalidArgumentException(
+                'Ngày sản phẩm mùa vụ không hợp lệ.'
+            );
+        }
+
+        return $value;
+    };
+
+    // 1. Validate basic product data.
+    $id = filter_var($input['id'] ?? null, FILTER_VALIDATE_INT);
+
+    if ($id === false || $id === null || $id <= 0) {
+        throw new InvalidArgumentException('Mã sản phẩm không hợp lệ.');
     }
 
-} else {
+    $name = $readString('name');
 
-    if ($category_id === null || $category_id <= 0) {
-        http_response_code(422);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Drink product requires a category'
-        ]);
-        exit;
+    if ($name === '' || mb_strlen($name, 'UTF-8') > 150) {
+        throw new InvalidArgumentException('Tên sản phẩm không hợp lệ.');
     }
 
-    $season_start = null;
-    $season_end = null;
-}
+    $isActive = $readFlag(
+        $input['is_active'] ?? 1,
+        'Trạng thái sản phẩm'
+    );
 
-$stmt = $pdo->prepare("
-    SELECT id, description, image
-    FROM products
-    WHERE id = ?
-    LIMIT 1
-");
+    $isSeasonal = $readFlag(
+        $input['is_seasonal'] ?? 0,
+        'Loại sản phẩm'
+    );
 
-$stmt->execute([$id]);
-$existingProduct = $stmt->fetch(PDO::FETCH_ASSOC);
+    // 2. Validate DRINKS / SEASON PRODUCT taxonomy.
+    $categoryRaw = $input['category_id'] ?? null;
 
-if (!$existingProduct) {
-    http_response_code(404);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Product not found'
-    ]);
-    exit;
-}
+    if ($isSeasonal === 1) {
+        if ($categoryRaw !== null && $categoryRaw !== '') {
+            throw new InvalidArgumentException(
+                'SEASON PRODUCT không được có danh mục.'
+            );
+        }
 
-if ($description === null) {
-    $description = $existingProduct['description'];
-}
+        $categoryId = null;
 
-if ($image === null || $image === '') {
-    $image = $existingProduct['image'];
-}
+        $seasonStart = $normalizeDate(
+            $input['season_start'] ?? null
+        );
 
-if ($is_seasonal === 0) {
-    $stmt = $pdo->prepare("
-        SELECT id
-        FROM categories
-        WHERE id = ?
+        $seasonEnd = $normalizeDate(
+            $input['season_end'] ?? null
+        );
+
+        if ($seasonStart === null || $seasonEnd === null) {
+            throw new InvalidArgumentException(
+                'SEASON PRODUCT phải có ngày bắt đầu và ngày kết thúc.'
+            );
+        }
+
+        if ($seasonStart > $seasonEnd) {
+            throw new InvalidArgumentException(
+                'Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.'
+            );
+        }
+    } else {
+        $categoryId = filter_var(
+            $categoryRaw,
+            FILTER_VALIDATE_INT
+        );
+
+        if ($categoryId === false || $categoryId === null || $categoryId <= 0) {
+            throw new InvalidArgumentException(
+                'DRINKS phải có danh mục hợp lệ.'
+            );
+        }
+
+        $seasonStart = null;
+        $seasonEnd = null;
+    }
+
+    // 3. Optional fields: null means preserve existing value.
+    $description = $input['description'] ?? null;
+    $image = $input['image'] ?? null;
+
+    if (
+        ($description !== null && !is_string($description)) ||
+        ($image !== null && !is_string($image))
+    ) {
+        throw new InvalidArgumentException(
+            'Mô tả hoặc ảnh sản phẩm không hợp lệ.'
+        );
+    }
+
+    if ($description !== null) {
+        $description = trim($description);
+    }
+
+    if ($image !== null) {
+        $image = trim($image);
+    }
+
+    // 4. Determine whether the request uses the new or legacy variant format.
+    $variantType = $readString('variant_type');
+
+    if (
+        $variantType !== '' &&
+        !in_array($variantType, ['default', 'size'], true)
+    ) {
+        throw new InvalidArgumentException(
+            'Loại biến thể không hợp lệ.'
+        );
+    }
+
+    $targetVariants = null;
+    $productPrice = null;
+
+    if ($variantType === 'default') {
+        $defaultPrice = $readPrice(
+            $input['price'] ?? null,
+            'Giá Default'
+        );
+
+        $targetVariants = [
+            'Default' => $defaultPrice
+        ];
+
+        $productPrice = $defaultPrice;
+
+    } elseif ($variantType === 'size') {
+        $priceM = $readPrice(
+            $input['price_m'] ?? null,
+            'Giá M'
+        );
+
+        $priceL = $readPrice(
+            $input['price_l'] ?? null,
+            'Giá L'
+        );
+
+        $targetVariants = [
+            'M' => $priceM,
+            'L' => $priceL
+        ];
+
+        $productPrice = $priceM;
+
+    } else {
+        // Legacy Edit Modal: only sends "price".
+        // Determine the current variant structure from the database later.
+        $productPrice = $readPrice(
+            $input['price'] ?? null,
+            'Giá sản phẩm'
+        );
+    }
+
+    // 5. Begin transaction and lock the product.
+    $pdo->beginTransaction();
+
+    $existingQuery = $pdo->prepare("
+        SELECT id, description, image
+        FROM products
+        WHERE id = :id
         LIMIT 1
+        FOR UPDATE
     ");
 
-    $stmt->execute([$category_id]);
+    $existingQuery->execute(['id' => $id]);
+    $existingProduct = $existingQuery->fetch(PDO::FETCH_ASSOC);
 
-    if (!$stmt->fetch()) {
-        http_response_code(422);
+    if (!$existingProduct) {
+        $pdo->rollBack();
+
+        http_response_code(404);
         echo json_encode([
             'success' => false,
-            'message' => 'Category not found'
-        ]);
+            'message' => 'Không tìm thấy sản phẩm.'
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
-}
 
-$stmt = $pdo->prepare("
-    UPDATE products
-    SET
-        category_id = :category_id,
-        name = :name,
-        description = :description,
-        price = :price,
-        image = :image,
-        is_active = :is_active,
-        is_seasonal = :is_seasonal,
-        season_start = :season_start,
-        season_end = :season_end
-    WHERE id = :id
-");
+    if ($description === null) {
+        $description = $existingProduct['description'];
+    }
 
-$stmt->bindValue(':category_id', $category_id, $category_id === null
-    ? PDO::PARAM_NULL
-    : PDO::PARAM_INT
-);
+    if ($image === null || $image === '') {
+        $image = $existingProduct['image'];
+    }
 
-$stmt->bindValue(':name', $name);
-$stmt->bindValue(
-    ':description',
-    $description,
-    $description === null
-        ? PDO::PARAM_NULL
-        : PDO::PARAM_STR
-);
-$stmt->bindValue(':price', $price);
-$stmt->bindValue(
-    ':image',
-    $image,
-    $image === null
-        ? PDO::PARAM_NULL
-        : PDO::PARAM_STR
-);
-$stmt->bindValue(':is_active', $is_active, PDO::PARAM_INT);
-$stmt->bindValue(':is_seasonal', $is_seasonal, PDO::PARAM_INT);
+    // 6. Verify category is active for DRINKS.
+    if ($isSeasonal === 0) {
+        $categoryQuery = $pdo->prepare("
+            SELECT id
+            FROM categories
+            WHERE id = :category_id
+                AND is_active = 1
+            LIMIT 1
+        ");
 
-$stmt->bindValue(':season_start', $season_start);
-$stmt->bindValue(':season_end', $season_end);
+        $categoryQuery->execute([
+            'category_id' => $categoryId
+        ]);
 
-$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        if (!$categoryQuery->fetch()) {
+            throw new InvalidArgumentException(
+                'Danh mục không tồn tại hoặc đang bị ẩn.'
+            );
+        }
+    }
 
-$stmt->execute();
+    // 7. Load current active variants.
+    $variantQuery = $pdo->prepare("
+        SELECT id, name, price
+        FROM product_variants
+        WHERE product_id = :product_id
+            AND is_active = 1
+        ORDER BY id ASC
+        FOR UPDATE
+    ");
 
-echo json_encode([
-    'success' => true,
-    'message' => 'Product updated successfully',
-    'product_id' => $id
-]);
+    $variantQuery->execute(['product_id' => $id]);
+    $currentVariants = $variantQuery->fetchAll(PDO::FETCH_ASSOC);
+
+    // 8. Keep backward compatibility with the existing Edit Modal.
+    if ($targetVariants === null) {
+        $currentMap = [];
+
+        foreach ($currentVariants as $variant) {
+            if (isset($currentMap[$variant['name']])) {
+                throw new InvalidArgumentException(
+                    'Sản phẩm có biến thể trùng tên. Cần kiểm tra dữ liệu trước khi cập nhật.'
+                );
+            }
+
+            $currentMap[$variant['name']] = $variant['price'];
+        }
+
+        if (
+            count($currentMap) === 1 &&
+            isset($currentMap['Default'])
+        ) {
+            $targetVariants = [
+                'Default' => $productPrice
+            ];
+
+        } elseif (
+            count($currentMap) === 2 &&
+            isset($currentMap['M']) &&
+            isset($currentMap['L'])
+        ) {
+            $targetVariants = [
+                'M' => $productPrice,
+                'L' => $readPrice(
+                    $currentMap['L'],
+                    'Giá L hiện tại'
+                )
+            ];
+
+        } else {
+            throw new InvalidArgumentException(
+                'Cấu trúc biến thể hiện tại không hợp lệ. Vui lòng kiểm tra sản phẩm.'
+            );
+        }
+    }
+
+    // 9. Keep products.price synchronized with Default or M.
+    $productPrice = $targetVariants['Default']
+        ?? $targetVariants['M'];
+
+    $updateProduct = $pdo->prepare("
+        UPDATE products
+        SET
+            category_id = :category_id,
+            name = :name,
+            description = :description,
+            price = :price,
+            image = :image,
+            is_active = :is_active,
+            is_seasonal = :is_seasonal,
+            season_start = :season_start,
+            season_end = :season_end
+        WHERE id = :id
+    ");
+
+    $updateProduct->bindValue(
+        ':category_id',
+        $categoryId,
+        $categoryId === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+    );
+
+    $updateProduct->bindValue(':name', $name);
+    $updateProduct->bindValue(
+        ':description',
+        $description,
+        $description === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+    );
+    $updateProduct->bindValue(':price', $productPrice);
+    $updateProduct->bindValue(
+        ':image',
+        $image,
+        $image === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+    );
+    $updateProduct->bindValue(':is_active', $isActive, PDO::PARAM_INT);
+    $updateProduct->bindValue(':is_seasonal', $isSeasonal, PDO::PARAM_INT);
+    $updateProduct->bindValue(
+        ':season_start',
+        $seasonStart,
+        $seasonStart === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+    );
+    $updateProduct->bindValue(
+        ':season_end',
+        $seasonEnd,
+        $seasonEnd === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+    );
+    $updateProduct->bindValue(':id', $id, PDO::PARAM_INT);
+
+    $updateProduct->execute();
+
+    // 10. Deactivate old variants instead of deleting them.
+    $deactivateVariants = $pdo->prepare("
+        UPDATE product_variants
+        SET is_active = 0
+        WHERE product_id = :product_id
+    ");
+
+    $deactivateVariants->execute([
+        'product_id' => $id
+    ]);
+
+    // 11. Reactivate matching variants or insert new ones.
+    $findVariant = $pdo->prepare("
+        SELECT id
+        FROM product_variants
+        WHERE product_id = :product_id
+            AND name = :name
+        ORDER BY id ASC
+        LIMIT 1
+        FOR UPDATE
+    ");
+
+    $updateVariant = $pdo->prepare("
+        UPDATE product_variants
+        SET
+            price = :price,
+            is_active = 1
+        WHERE id = :id
+    ");
+
+    $insertVariant = $pdo->prepare("
+        INSERT INTO product_variants (
+            product_id,
+            name,
+            price,
+            is_active
+        ) VALUES (
+            :product_id,
+            :name,
+            :price,
+            1
+        )
+    ");
+
+    foreach ($targetVariants as $variantName => $variantPrice) {
+        $findVariant->execute([
+            'product_id' => $id,
+            'name' => $variantName
+        ]);
+
+        $existingVariant = $findVariant->fetch(PDO::FETCH_ASSOC);
+
+        if ($existingVariant) {
+            $updateVariant->execute([
+                'price' => $variantPrice,
+                'id' => $existingVariant['id']
+            ]);
+        } else {
+            $insertVariant->execute([
+                'product_id' => $id,
+                'name' => $variantName,
+                'price' => $variantPrice
+            ]);
+        }
+    }
+
+    $pdo->commit();
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Cập nhật sản phẩm thành công.',
+        'data' => [
+            'id' => $id,
+            'price' => (float) $productPrice,
+            'variants' => $targetVariants
+        ]
+    ], JSON_UNESCAPED_UNICODE);
+
+} catch (InvalidArgumentException $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
+    http_response_code(422);
+
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ], JSON_UNESCAPED_UNICODE);
 
 } catch (Throwable $e) {
-    error_log('Admin update product error: ' . $e->getMessage());
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
+    error_log(
+        'Admin update product error: ' . $e->getMessage()
+    );
 
     http_response_code(500);
+
     echo json_encode([
         'success' => false,
         'message' => 'Không thể cập nhật sản phẩm. Vui lòng thử lại.'
