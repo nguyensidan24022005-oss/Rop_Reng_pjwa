@@ -44,6 +44,25 @@ try {
 
     $products = $productQuery->fetchAll();
 
+    $categoryQuery = $pdo->query(
+        "SELECT
+            id,
+            name,
+            slug,
+            is_active
+        FROM categories
+        WHERE is_active = 1
+        ORDER BY id ASC"
+    );
+    $categories = $categoryQuery->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($categories as &$category) {
+        $category['id'] = (int) $category['id'];
+        $category['is_active'] = (int) $category['is_active'];
+    }
+
+    unset($category);
+
     $variantQuery = $pdo->query(
         "SELECT
             id,
@@ -91,8 +110,9 @@ try {
 
     echo json_encode([
         'success' => true,
-        'data' => $products
-    ]);
+        'data' => $products,
+        'categories' => $categories
+    ], JSON_UNESCAPED_UNICODE);
 
 } catch (Throwable $e) {
 

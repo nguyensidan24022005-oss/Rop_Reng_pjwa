@@ -1168,6 +1168,34 @@ document.addEventListener(
 );
 
 let adminProductsCache = [];
+let adminCategoriesCache = [];
+
+function populateAdminCategorySelect(
+    selectElement,
+    placeholder = '-- Chọn danh mục --'
+) {
+    if (!selectElement) {
+        return;
+    }
+
+    selectElement.innerHTML = '';
+
+    const placeholderOption = document.createElement('option');
+    placeholderOption.value = '';
+    placeholderOption.textContent = placeholder;
+
+    selectElement.append(placeholderOption);
+
+    adminCategoriesCache.forEach(category => {
+        const option = document.createElement('option');
+
+        option.value = String(category.id);
+        option.textContent = category.name;
+
+        selectElement.append(option);
+    });
+}
+
 async function loadAdminProducts() {
 
     const tableWrapper =
@@ -1210,6 +1238,9 @@ async function loadAdminProducts() {
         }
 
         adminProductsCache = result.data || [];
+        adminCategoriesCache = Array.isArray(result.categories)
+            ? result.categories
+            : [];
 
         const products =
             Array.isArray(result.data)
@@ -1615,29 +1646,7 @@ function openAdminProductEditModal(product) {
     );
 
     if (categoryInput) {
-        const categories = new Map();
-
-        adminProductsCache.forEach(item => {
-            if (
-                item.category_id !== null &&
-                item.category_id !== undefined
-            ) {
-                categories.set(
-                    String(item.category_id),
-                    item.category_name || `Danh mục ${item.category_id}`
-                );
-            }
-        });
-
-        categoryInput.options.length = 1;
-
-        categories.forEach((name, categoryId) => {
-            const option = document.createElement('option');
-            option.value = categoryId;
-            option.textContent = name;
-            categoryInput.append(option);
-        });
-
+        populateAdminCategorySelect(categoryInput);
         categoryInput.value =
             product.category_id !== null &&
             product.category_id !== undefined
