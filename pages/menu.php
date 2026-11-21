@@ -29,6 +29,7 @@ if ($categorySlug !== '') {
         INNER JOIN categories c
             ON c.id = p.category_id
         WHERE p.is_active = 1
+            AND p.is_seasonal = 0
             AND c.is_active = 1
             AND c.slug = :slug
         ORDER BY p.id ASC"
@@ -53,6 +54,7 @@ if ($categorySlug !== '') {
         INNER JOIN categories c
             ON c.id = p.category_id
         WHERE p.is_active = 1
+            AND p.is_seasonal = 0
             AND c.is_active = 1
         ORDER BY p.id ASC"
     );

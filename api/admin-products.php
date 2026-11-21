@@ -37,7 +37,7 @@ try {
             c.name AS category_name,
             c.slug AS category_slug
         FROM products p
-        INNER JOIN categories c
+        LEFT JOIN categories c
             ON c.id = p.category_id
         ORDER BY p.id ASC"
     );
@@ -72,7 +72,10 @@ try {
     foreach ($products as &$product) {
         
         $product['id'] = (int) $product['id'];
-        $product['category_id'] = (int) $product['category_id'];
+        $product['category_id'] = 
+            $product['category_id'] !== null
+                ? (int) $product['category_id']
+                : null;
         $product['price'] = (float) $product['price'];
 
         $product['is_active'] = (int) $product['is_active'];
