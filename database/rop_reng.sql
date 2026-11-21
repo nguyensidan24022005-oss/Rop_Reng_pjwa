@@ -28,7 +28,7 @@ COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE products (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    category_id INT UNSIGNED NOT NULL,
+    category_id INT UNSIGNED DEFAULT NULL,
     name VARCHAR(150) NOT NULL,
     description TEXT DEFAULT NULL,
     price DECIMAL(10, 2) NOT NULL DEFAULT 0,

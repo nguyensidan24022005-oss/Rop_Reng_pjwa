@@ -1,6 +1,7 @@
 <?php
 
 $pageTitle = "Quản trị - Rốp Rẻng";
+$currentPage = "admin";
 $baseHref = "../";
 
 require_once __DIR__ . '/../includes/header.php';
@@ -79,7 +80,7 @@ require_once __DIR__ . '/../includes/header.php';
 
                 </div>
 
-                <div class="admin-stats-group">
+                <div class="admin-stats-group" id="dashboardRevenue">
 
                     <div class="admin-stats-group-header">
                         <small>DOANH THU</small>
@@ -177,7 +178,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </a>
 
                 <a 
-                    href="admin/categories.php"
+                    href="admin/products.php"
                     class="admin-dashboard-card"
                 >
                     <span class="admin-dashboard-card-number">
@@ -188,7 +189,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <small>DANH MỤC</small>
                         <h3>Danh mục</h3>
                         <p>
-                            Quản lý nhóm sản phẩm.
+                            Chọn danh mục khi quản lý sản phẩm.
                         </p>
                     </div>
 
@@ -198,7 +199,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </a>
 
                 <a 
-                    href="admin/revenue.php"
+                    href="admin/index.php#dashboardRevenue"
                     class="admin-dashboard-card"
                 >
                     <span class="admin-dashboard-card-number">
@@ -209,7 +210,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <small>THỐNG KÊ</small>
                         <h3>Doanh thu</h3>
                         <p>
-                            Xem doanh thu và số liệu cơ bản.
+                            Xem thống kê doanh thu ở phần tổng quan.
                         </p>
                     </div>
 

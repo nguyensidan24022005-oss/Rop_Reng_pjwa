@@ -1,6 +1,6 @@
 <?php
 
-$currentPage = $currentPage ?? 'home'
+$currentPage = $currentPage ?? 'home';
 
 ?>
 

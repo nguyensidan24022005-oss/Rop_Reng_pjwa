@@ -1,6 +1,7 @@
 <?php
 
 $pageTitle = "Chi tiết đơn hàng - Rốp Rẻng";
+$currentPage = "admin";
 $baseHref = "../";
 
 require_once __DIR__ . '/../includes/header.php';

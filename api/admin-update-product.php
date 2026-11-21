@@ -4,6 +4,8 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../config/db.php';
 
+try {
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode([
@@ -236,3 +238,13 @@ echo json_encode([
     'message' => 'Product updated successfully',
     'product_id' => $id
 ]);
+
+} catch (Throwable $e) {
+    error_log('Admin update product error: ' . $e->getMessage());
+
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Không thể cập nhật sản phẩm. Vui lòng thử lại.'
+    ], JSON_UNESCAPED_UNICODE);
+}
