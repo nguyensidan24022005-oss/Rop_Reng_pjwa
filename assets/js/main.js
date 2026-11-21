@@ -1167,6 +1167,7 @@ document.addEventListener(
     }
 );
 
+let adminProductsCache = [];
 async function loadAdminProducts() {
 
     const tableWrapper =
@@ -1208,6 +1209,8 @@ async function loadAdminProducts() {
             );
         }
 
+        adminProductsCache = result.data || [];
+
         const products =
             Array.isArray(result.data)
                 ? result.data
@@ -1243,6 +1246,7 @@ async function loadAdminProducts() {
                         <th>SIZE</th>
                         <th>TRẠNG THÁI</th>
                         <th>NHÃN</th>
+                        <th>CHỈNH SỬA</th>
                     </tr>
 
                 </thead>
@@ -1386,7 +1390,7 @@ async function loadAdminProducts() {
                                 `
                                 : `
                                     <span class="admin-product-status admin-product-status-inactive">
-                                        ĐANG ẨN
+                                        NGỪNG BÁN
                                     </span>
                                 `;
 
@@ -1440,6 +1444,16 @@ async function loadAdminProducts() {
                                 <td>
                                     ${flagsHtml}
                                 </td>
+
+                                <td>
+                                    <button
+                                        type="button"
+                                        class="admin-product-edit"
+                                        data-product-id="${escapeHtml(product.id)}"
+                                    >
+                                        SỬA
+                                    </button>
+                                </td>
                                 
                             </tr>
                         `;
@@ -1467,6 +1481,339 @@ async function loadAdminProducts() {
     }
 }
 
+function openAdminProductEditModal(product) {
+    const modal = document.getElementById(
+        'adminProductEditModal'
+    );
+
+    const idInput = document.getElementById(
+        'adminEditProductId'
+    );
+
+    const nameInput = document.getElementById(
+        'adminEditProductName'
+    );
+
+    const priceInput = document.getElementById(
+        'adminEditProductPrice'
+    );
+
+    const typeInput = document.getElementById(
+        'adminEditProductType'
+    );
+
+    const activeInput = document.getElementById(
+        'adminEditProductActive'
+    );
+
+    if (
+        !modal ||
+        !idInput ||
+        !nameInput ||
+        !priceInput ||
+        !typeInput ||
+        !activeInput
+    ) {
+        console.error(
+            'Không tìm thấy Product Edit Modal.'
+        );
+        return;
+    }
+
+    idInput.value = product.id ?? '';
+    nameInput.value = product.name ?? '';
+    priceInput.value = product.price ?? '';
+    activeInput.value =
+        Number(product.is_active) === 1
+            ? '1'
+            : '0';
+
+    const isSeasonal =
+        Number(product.is_seasonal) === 1;
+
+    typeInput.value = isSeasonal
+        ? 'season'
+        : 'drink';
+
+    syncAdminProductEditType();
+
+    const categoryInput = document.getElementById(
+        'adminEditProductCategory'
+    );
+
+    const seasonStartInput = document.getElementById(
+        'adminEditSeasonStart'
+    );
+
+    const seasonEndInput = document.getElementById(
+        'adminEditSeasonEnd'
+    );
+
+    if (categoryInput) {
+        const categories = new Map();
+
+        adminProductsCache.forEach(item => {
+            if (
+                item.category_id !== null &&
+                item.category_id !== undefined
+            ) {
+                categories.set(
+                    String(item.category_id),
+                    item.category_name || `Danh mục ${item.category_id}`
+                );
+            }
+        });
+
+        categoryInput.options.length = 1;
+
+        categories.forEach((name, categoryId) => {
+            const option = document.createElement('option');
+            option.value = categoryId;
+            option.textContent = name;
+            categoryInput.append(option);
+        });
+
+        categoryInput.value =
+            product.category_id !== null &&
+            product.category_id !== undefined
+                ? String(product.category_id)
+                : '';
+    }
+
+    if (seasonStartInput) {
+        seasonStartInput.value =
+            product.season_start ?? '';
+    }
+
+    if (seasonEndInput) {
+        seasonEndInput.value =
+            product.season_end ?? '';
+    }
+
+    modal.hidden = false;
+}
+
+function syncAdminProductEditType() {
+    const typeInput = document.getElementById(
+        'adminEditProductType'
+    );
+    const categoryGroup = document.getElementById(
+        'adminEditCategoryGroup'
+    );
+    const seasonStartGroup = document.getElementById(
+        'adminEditSeasonStartGroup'
+    );
+    const seasonEndGroup = document.getElementById(
+        'adminEditSeasonEndGroup'
+    );
+
+    if (
+        !typeInput ||
+        !categoryGroup ||
+        !seasonStartGroup ||
+        !seasonEndGroup
+    ) {
+        return;
+    }
+
+    const isSeason =
+        typeInput.value === 'season';
+
+    categoryGroup.hidden = isSeason;
+    seasonStartGroup.hidden = !isSeason;
+    seasonEndGroup.hidden = !isSeason;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const typeInput = document.getElementById(
+        'adminEditProductType'
+    );
+
+    const closeButton = document.getElementById(
+        'adminProductEditClose'
+    );
+
+    const cancelButton = document.getElementById(
+        'adminProductEditCancel'
+    );
+
+    const modal = document.getElementById(
+        'adminProductEditModal'
+    );
+
+    const overlay = document.querySelector(
+        '[data-close-product-modal]'
+    );
+
+    if (typeInput) {
+        typeInput.addEventListener(
+            'change',
+            syncAdminProductEditType
+        );
+    }
+
+    const closeModal = () => {
+        if (modal) {
+            modal.hidden = true;
+        }
+    };
+
+    if (closeButton) {
+        closeButton.addEventListener(
+            'click',
+            closeModal
+        );
+    }
+
+    if (cancelButton) {
+        cancelButton.addEventListener(
+            'click',
+            closeModal
+        );
+    }
+
+    if (overlay) {
+        overlay.addEventListener(
+            'click',
+            closeModal
+        );
+    }
+
+    const editForm = document.getElementById(
+        'adminProductEditForm'
+    );
+
+    if (editForm) {
+        editForm.addEventListener(
+            'submit',
+            async event => {
+                event.preventDefault();
+
+                const idInput = document.getElementById(
+                    'adminEditProductId'
+                );
+
+                const nameInput = document.getElementById(
+                    'adminEditProductName'
+                );
+
+                const priceInput = document.getElementById(
+                    'adminEditProductPrice'
+                );
+
+                const typeInput = document.getElementById(
+                    'adminEditProductType'
+                );
+
+                const categoryInput = document.getElementById(
+                    'adminEditProductCategory'
+                );
+
+                const seasonStartInput = document.getElementById(
+                    'adminEditSeasonStart'
+                );
+
+                const seasonEndInput = document.getElementById(
+                    'adminEditSeasonEnd'
+                );
+
+                const activeInput = document.getElementById(
+                    'adminEditProductActive'
+                );
+
+                const submitButton =
+                    editForm.querySelector(
+                        'button[type="submit"]'
+                    );
+
+                const isSeason =
+                    typeInput.value === 'season';
+
+                const payload = {
+                    id: Number(idInput.value),
+                    name: nameInput.value.trim(),
+                    price: Number(priceInput.value),
+                    is_active: Number(activeInput.value),
+                    is_seasonal: isSeason ? 1 : 0,
+                    category_id: isSeason
+                        ? null
+                        : (
+                            categoryInput.value
+                                ? Number(categoryInput.value)
+                                : null
+                        ),
+                    season_start: isSeason
+                        ? (
+                            seasonStartInput.value || null
+                        )
+                        : null,
+                    season_end: isSeason
+                        ? (
+                            seasonEndInput.value || null
+                        )
+                        : null
+                };
+                if (
+                    !payload.id ||
+                    !payload.name ||
+                    payload.price < 0
+                ) {
+                    alert(
+                        'Vui lòng kiểm tra lại thông tin sản phẩm.'
+                    );
+                    return;
+                }
+                try {
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                        submitButton.textContent =
+                            'ĐANG LƯU...'
+                    }
+                    const response = await fetch(
+                        'api/admin-update-product.php',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type':
+                                    'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        }
+                    );
+                    const result =
+                        await response.json();
+                    if (!response.ok || !result.success) {
+                        throw new Error(
+                            result.message ||
+                            'Không thể cập nhật sản phẩm.'
+                        );
+                    }
+                    alert(
+                        'Cập nhật sản phẩm thành công.'
+                    );
+                    closeModal();
+                    await loadAdminProducts();
+                } catch (error) {
+                    console.error(
+                        'Update product error:',
+                        error
+                    );
+                    alert(
+                        error.message ||
+                        'Có lỗi xảy ra khi cập nhật.'
+                    );
+                } finally {
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.textContent =
+                            'LƯU';
+                    }
+                }
+            }
+        );
+    }
+});
+
 document.addEventListener(
     'click',
     event => {
@@ -1484,6 +1831,38 @@ document.addEventListener(
 
     }
 );
+
+document.addEventListener('click', event => {
+    const button = event.target.closest(
+        '.admin-product-edit'
+    );
+    if (!button) {
+        return;
+    }
+
+    const productId = button.dataset.productId;
+    if (!productId) {
+        return;
+    }
+
+    const row = button.closest('tr');
+    if (!row) {
+        return;
+    }
+
+    const product = adminProductsCache.find(
+        item => String(item.id) === String(productId)
+    );
+    if (!product) {
+        console.error(
+            'Không tìm thấy sản phẩm:',
+            productId
+        );
+        return;
+    }
+
+    openAdminProductEditModal(product);
+});
 
 document.addEventListener(
     'DOMContentLoaded',

@@ -80,6 +80,187 @@ require_once __DIR__ . '/../includes/header.php';
 
 </section>
 
+<div
+    class="admin-modal"
+    id="adminProductEditModal"
+    hidden
+>
+    <div
+        class="admin-modal-overlay"
+        data-close-product-modal
+    ></div>
+
+    <div
+        class="admin-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="adminProductEditTitle"
+    >
+        <div class="admin-modal-header">
+            <div>
+                <p class="admin-eyebrow">QUẢN LÝ SẢN PHẨM</p>
+                <h2 id="adminProductEditTitle">
+                    SỬA SẢN PHẨM
+                </h2>
+            </div>
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="adminProductEditClose"
+                aria-label="Đóng"
+            >
+                ×
+            </button>
+        </div>
+
+        <form id="adminProductEditForm">
+            <input 
+                type="hidden"
+                id="adminEditProductId"
+                name="id"
+            >
+
+            <div class="admin-form-grid">
+                <div class="admin-form-group">
+                    <label for="adminEditProductName">
+                        Tên sản phẩm
+                    </label>
+
+                    <input 
+                        type="text"
+                        id="adminEditProductName"
+                        name="name"
+                        required
+                    >
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="adminEditProductPrice">
+                        Giá
+                    </label>
+
+                    <input 
+                        type="number"
+                        id="adminEditProductPrice"
+                        name="price"
+                        min="0"
+                        step="1000"
+                        required
+                    >
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="adminEditProductType">
+                        Loại sản phẩm
+                    </label>
+
+                    <select 
+                        name="type" 
+                        id="adminEditProductType"
+                        required
+                    >
+                        <option value="drink">
+                            DRINKS
+                        </option>
+
+                        <option value="season">
+                            SEASON PRODUCT
+                        </option>
+                    </select>
+                </div>
+
+                <div
+                    class="admin-form-group"
+                    id="adminEditCategoryGroup"
+                >
+                    <label for="adminEditProductCategory">
+                        Danh mục
+                    </label>
+
+                    <select 
+                        name="category_id" 
+                        id="adminEditProductCategory"
+                    >
+                        <option value="">
+                            -- Chọn danh mục --
+                        </option>
+                    </select>
+                </div>
+
+                <div
+                    class="admin-form-group"
+                    id="adminEditSeasonStartGroup"
+                    hidden
+                >
+                    <label for="adminEditSeasonStart">
+                        Ngày bắt đầu
+                    </label>
+
+                    <input 
+                        type="date"
+                        id="adminEditSeasonStart"
+                        name="season_start"
+                    >
+                </div>
+
+                <div
+                    class="admin-form-group"
+                    id="adminEditSeasonEndGroup"
+                    hidden
+                >
+                    <label for="adminEditSeasonEnd">
+                        Ngày kết thúc
+                    </label>
+
+                    <input 
+                        type="date"
+                        id="adminEditSeasonEnd"
+                        name="season_end"
+                    >
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="adminEditProductActive">
+                        Trạng thái
+                    </label>
+
+                    <select 
+                        name="active" 
+                        id="adminEditProductActive"
+                    >
+                        <option value="1">
+                            Đang bán
+                        </option>
+
+                        <option value="0">
+                            Ngừng bán
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="admin-form-action">
+                <button
+                    type="button"
+                    class="admin-button-secondary"
+                    id="adminProductEditCancel"
+                >
+                    HỦY
+                </button>
+
+                <button
+                    type="submit"
+                    class="admin-button-primary"
+                >
+                    LƯU
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <?php
 
 require_once __DIR__ . '/../includes/footer.php';
