@@ -1748,6 +1748,119 @@ function syncAdminProductEditVariant() {
     priceLInput.required = isSize;
 }
 
+function syncAdminProductCreateType() {
+    const typeInput = document.getElementById(
+        'adminCreateProductType'
+    );
+
+    const categoryGroup = document.getElementById(
+        'adminCreateCategoryGroup'
+    );
+
+    const categoryInput = document.getElementById(
+        'adminCreateProductCategory'
+    );
+
+    const startGroup = document.getElementById(
+        'adminCreateSeasonStartGroup'
+    );
+
+    const endGroup = document.getElementById(
+        'adminCreateSeasonEndGroup'
+    );
+
+    const startInput = document.getElementById(
+        'adminCreateSeasonStart'
+    );
+
+    const endInput = document.getElementById(
+        'adminCreateSeasonEnd'
+    );
+
+    if (
+        !typeInput ||
+        !categoryGroup ||
+        !categoryInput ||
+        !startGroup ||
+        !endGroup ||
+        !startInput ||
+        !endInput
+    ) {
+        return;
+    }
+
+    const isSeason = typeInput.value === '1';
+
+    categoryGroup.hidden = isSeason;
+    startGroup.hidden = !isSeason;
+    endGroup.hidden = !isSeason;
+
+    categoryInput.required = !isSeason;
+    categoryInput.disabled = isSeason;
+
+    startInput.required = isSeason;
+    endInput.required = isSeason;
+
+    startInput.disabled = !isSeason;
+    endInput.disabled = !isSeason;
+}
+
+function syncAdminProductCreateVariant() {
+    const variantInput = document.getElementById(
+        'adminCreateVariantType'
+    );
+
+    const defaultGroup = document.getElementById(
+        'adminCreateDefaultPriceGroup'
+    );
+
+    const priceMGroup = document.getElementById(
+        'adminCreatePriceMGroup'
+    );
+
+    const priceLGroup = document.getElementById(
+        'adminCreatePriceLGroup'
+    );
+
+    const defaultInput = document.getElementById(
+        'adminCreatePrice'
+    );
+
+    const priceMInput = document.getElementById(
+        'adminCreatePriceM'
+    );
+
+    const priceLInput = document.getElementById(
+        'adminCreatePriceL'
+    );
+
+    if (
+        !variantInput ||
+        !defaultGroup ||
+        !priceMGroup ||
+        !priceLGroup ||
+        !defaultInput ||
+        !priceMInput ||
+        !priceLInput
+    ) {
+        return;
+    }
+
+    const isSize = variantInput.value === 'size';
+
+    defaultGroup.hidden = isSize;
+    priceMGroup.hidden = !isSize;
+    priceLGroup.hidden = !isSize;
+
+    defaultInput.required = !isSize;
+    priceMInput.required = isSize;
+    priceLInput.required = isSize;
+
+    defaultInput.disabled = isSize;
+    priceMInput.disabled = !isSize;
+    priceLInput.disabled = !isSize;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const typeInput = document.getElementById(
         'adminEditProductType'
@@ -2052,3 +2165,252 @@ document.addEventListener(
 
     }
 );
+
+document.addEventListener('DOMContentLoaded', () => {
+    const openButton = document.getElementById(
+        'adminProductCreateOpen'
+    );
+
+    const modal = document.getElementById(
+        'adminProductCreateModal'
+    );
+
+    const form = document.getElementById(
+        'adminProductCreateForm'
+    );
+
+    const closeButton = document.getElementById(
+        'adminProductCreateClose'
+    );
+
+    const cancelButton = document.getElementById(
+        'adminProductCreateCancel'
+    );
+
+    const overlay = document.getElementById(
+        '[data-close-create-product-modal]'
+    );
+
+    const typeInput = document.getElementById(
+        'adminCreateProductType'
+    );
+
+    const variantInput = document.getElementById(
+        'adminCreateVariantType'
+    );
+
+    const categoryInput = document.getElementById(
+        'adminCreateProductCategory'
+    );
+    if (
+        !openButton ||
+        !modal ||
+        !form ||
+        !typeInput ||
+        !variantInput ||
+        !categoryInput
+    ) {
+        return;
+    }
+    const closeModal = () => {
+        modal.hidden = true;
+    };
+    const loadCategories = async () => {
+        const response = await fetch(
+            'api/admin-products.php'
+        );
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(
+                result.message || 'Không thể tải danh mục.'
+            );
+        }
+        if (!Array.isArray(result.categories)) {
+            throw new Error(
+                'API chưa trả về danh sách Category.'
+            );
+        }
+        adminCategoriesCache = result.categories;
+        populateAdminCategorySelect(categoryInput);
+    };
+    openButton.addEventListener('click', async () => {
+        try {
+            form.reset();
+
+            syncAdminProductCreateType();
+            syncAdminProductCreateVariant();
+
+            openButton.disabled = true;
+
+            await loadCategories();
+
+            modal.hidden = false;
+        } catch (error) {
+            console.error(
+                'Load create product categories error:',
+                error
+            );
+            alert(
+                error.message ||
+                'Không thể mở form tạo sản phẩm.'
+            );
+        } finally {
+            openButton.disabled = false;
+        }
+    });
+
+    if (closeButton) {
+        closeButton.addEventListener(
+            'click',
+            closeModal
+        );
+    }
+    if (cancelButton) {
+        cancelButton.addEventListener(
+            'click',
+            closeModal
+        );
+    }
+    if (overlay) {
+        overlay.addEventListener(
+            'click',
+            closeModal
+        );
+    }
+    typeInput.addEventListener(
+        'change',
+        syncAdminProductCreateType
+    );
+    variantInput.addEventListener(
+        'change',
+        syncAdminProductCreateVariant
+    );
+
+    syncAdminProductCreateType();
+    syncAdminProductCreateVariant();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById(
+        'adminProductCreateForm'
+    );
+    if (!form) {
+        return;
+    }
+    const submitButton = form.querySelector(
+        'button[type="submit"]'
+    );
+    const modal = document.getElementById(
+        'adminProductCreateModal'
+    );
+    const imageInput = document.getElementById(
+        'adminCreateProductImage'
+    );
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const typeInput = document.getElementById(
+            'adminCreateProductType'
+        );
+
+        const variantInput = document.getElementById(
+            'adminCreateVariantType'
+        );
+
+        const categoryInput = document.getElementById(
+            'adminCreateProductCategory'
+        );
+
+        const startInput = document.getElementById(
+            'adminCreateSeasonStart'
+        );
+
+        const endInput = document.getElementById(
+            'adminCreateSeasonEnd'
+        );
+
+        const isSeason = typeInput.value === '1';
+        const isSize = variantInput.value === 'size';
+
+        if (
+            isSeason &&
+            startInput.value > endInput.value
+        ) {
+            alert(
+                'Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.'
+            );
+            return;
+        }
+        const imageFile = imageInput.files[0];
+        if (imageFile) {
+            const allowedTypes = [
+                'image/jpeg',
+                'image/png',
+                'image/webp'
+            ];
+            if (!allowedTypes.includes(imageFile.type)) {
+                alert(
+                    'Chỉ hỗ trợ ảnh JPG, PNG hoặc WEBP.'
+                );
+                return;
+            }
+            if (imageFile.size > 5 * 1024 * 1024) {
+                alert(
+                    'Ảnh không được vượt quá 5MB.'
+                );
+                return;
+            }
+        }
+        const formData = new FormData(form);
+        formData.set(
+            'is_seasonal',
+            isSeason ? '1' : '0'
+        );
+        try {
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'ĐANG TẠO...';
+            }
+            const response = await fetch(
+                'api/admin-create-product.php',
+                {
+                    method: 'POST',
+                    body: formData
+                }
+            );
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message ||
+                    'Không thể tạo sản phẩm.'
+                );
+            }
+            alert(
+                `Tạo sản phẩm thành công. Mã sản phẩm: ${result.data?.id ?? ''}`
+            );
+            form.reset();
+
+            syncAdminProductCreateType();
+            syncAdminProductCreateVariant();
+
+            if (modal) {
+                modal.hidden = true;
+            }
+            await loadAdminProducts();
+        } catch (error) {
+            console.error(
+                'Create product error:',
+                error
+            );
+            alert(
+                error.message ||
+                'Có lỗi xảy ra khi tạo sản phẩm.'
+            );
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'TẠO SẢN PHẨM'
+            }
+        }
+    });
+});

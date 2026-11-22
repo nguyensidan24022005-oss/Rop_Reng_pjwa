@@ -54,13 +54,25 @@ require_once __DIR__ . '/../includes/header.php';
 
                 </div>
 
-                <button
-                    type="button"
-                    class="admin-refresh-button"
-                    id="adminProductRefresh"
-                >
-                    ↻ LÀM MỚI
-                </button>
+                <div class="admin-products-actions">
+
+                    <button
+                        type="button"
+                        class="admin-product-create-button"
+                        id="adminProductCreateOpen"
+                    >
+                        + THÊM SẢN PHẨM
+                    </button>
+
+                    <button
+                        type="button"
+                        class="admin-refresh-button"
+                        id="adminProductRefresh"
+                    >
+                        ↻ LÀM MỚI
+                    </button>
+
+                </div>
 
             </div>
 
@@ -136,7 +148,7 @@ require_once __DIR__ . '/../includes/header.php';
                     >
                 </div>
 
-                <div class="admim-form-group">
+                <div class="admin-form-group">
                     <label for="adminEditVariantType">
                         Nhóm phân loại
                     </label>
@@ -303,6 +315,285 @@ require_once __DIR__ . '/../includes/header.php';
                 >
                     LƯU
                 </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CREATE PRODUCT MODAL -->
+<div
+    class="admin-modal"
+    id="adminProductCreateModal"
+    hidden
+>
+    <div
+        class="admin-modal-overlay"
+        data-close-create-product-modal
+    ></div>
+
+    <div
+        class="admin-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="adminProductCreateTitle"
+    >
+        <div class="admin-modal-header">
+            <div>
+                <p class="admin-eyebrow">QUẢN LÝ SẢN PHẨM</p>
+                <h2 id="adminProductCreateTitle">
+                    THÊM SẢN PHẨM
+                </h2>
+            </div>
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="adminProductCreateClose"
+                aria-label="Đóng"
+            >
+                ×
+            </button>
+        </div>
+
+        <form
+            id="adminProductCreateForm"
+            enctype="multipart/form-data"
+        >
+            <div class="admin-form-grid">
+
+                <!-- NAME -->
+                <div class="admin-form-group">
+                    <label for="adminCreateProductName">
+                        Tên sản phẩm
+                    </label>
+
+                    <input
+                        type="text"
+                        id="adminCreateProductName"
+                        name="name"
+                        maxlength="150"
+                        required
+                    >
+                </div>
+
+                <!-- PRODUCT TYPE -->
+                <div class="admin-form-group">
+                    <label for="adminCreateProductType">
+                        Loại sản phẩm
+                    </label>
+
+                    <select
+                        id="adminCreateProductType"
+                        name="is_seasonal"
+                        required
+                    >
+                        <option value="0">DRINKS</option>
+                        <option value="1">SEASON PRODUCT</option>
+                    </select>
+                </div>
+
+                <!-- CATEGORY -->
+                <div
+                    class="admin-form-group"
+                    id="adminCreateCategoryGroup"
+                >
+                    <label for="adminCreateProductCategory">
+                        Danh mục
+                    </label>
+
+                    <select
+                        id="adminCreateProductCategory"
+                        name="category_id"
+                        required
+                    >
+                        <option value="">
+                            -- Chọn danh mục --
+                        </option>
+                    </select>
+                </div>
+
+                <!-- SEASON START -->
+                <div
+                    class="admin-form-group"
+                    id="adminCreateSeasonStartGroup"
+                    hidden
+                >
+                    <label for="adminCreateSeasonStart">
+                        Ngày bắt đầu
+                    </label>
+
+                    <input
+                        type="date"
+                        id="adminCreateSeasonStart"
+                        name="season_start"
+                    >
+                </div>
+
+                <!-- SEASON END -->
+                <div
+                    class="admin-form-group"
+                    id="adminCreateSeasonEndGroup"
+                    hidden
+                >
+                    <label for="adminCreateSeasonEnd">
+                        Ngày kết thúc
+                    </label>
+
+                    <input
+                        type="date"
+                        id="adminCreateSeasonEnd"
+                        name="season_end"
+                    >
+                </div>
+
+                <!-- VARIANT TYPE -->
+                <div class="admin-form-group">
+                    <label for="adminCreateVariantType">
+                        Cấu trúc biến thể
+                    </label>
+
+                    <select
+                        id="adminCreateVariantType"
+                        name="variant_type"
+                        required
+                    >
+                        <option value="default">Default</option>
+                        <option value="size">M / L</option>
+                    </select>
+                </div>
+
+                <!-- DEFAULT PRICE -->
+                <div
+                    class="admin-form-group"
+                    id="adminCreateDefaultPriceGroup"
+                >
+                    <label for="adminCreatePrice">
+                        Giá Default (VNĐ)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="adminCreatePrice"
+                        name="price"
+                        min="0"
+                        step="1000"
+                        required
+                    >
+                </div>
+
+                <!-- M PRICE -->
+                <div
+                    class="admin-form-group"
+                    id="adminCreatePriceMGroup"
+                    hidden
+                >
+                    <label for="adminCreatePriceM">
+                        Giá size M (VNĐ)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="adminCreatePriceM"
+                        name="price_m"
+                        min="0"
+                        step="1000"
+                    >
+                </div>
+
+                <!-- L PRICE -->
+                <div
+                    class="admin-form-group"
+                    id="adminCreatePriceLGroup"
+                    hidden
+                >
+                    <label for="adminCreatePriceL">
+                        Giá size L (VNĐ)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="adminCreatePriceL"
+                        name="price_l"
+                        min="0"
+                        step="1000"
+                    >
+                </div>
+
+                <!-- IMAGE -->
+                <div class="admin-form-group">
+                    <label for="adminCreateProductImage">
+                        Ảnh sản phẩm
+                    </label>
+
+                    <input
+                        type="file"
+                        id="adminCreateProductImage"
+                        name="image"
+                        accept="image/jpeg,image/png,image/webp"
+                    >
+
+                    <small>
+                        JPG, PNG hoặc WEBP. Tối đa 5MB.
+                    </small>
+                </div>
+
+                <!-- FLAGS -->
+                <div class="admin-form-group">
+                    <label>Nhãn sản phẩm</label>
+
+                    <label class="admin-form-checkbox">
+                        <input
+                            type="checkbox"
+                            name="is_best_seller"
+                            value="1"
+                        >
+                        Best Seller
+                    </label>
+
+                    <label class="admin-form-checkbox">
+                        <input
+                            type="checkbox"
+                            name="is_new"
+                            value="1"
+                        >
+                        Sản phẩm mới
+                    </label>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div
+                    class="admin-form-group admin-form-group-full"
+                >
+                    <label for="adminCreateProductDescription">
+                        Mô tả sản phẩm
+                    </label>
+
+                    <textarea
+                        id="adminCreateProductDescription"
+                        name="description"
+                        rows="4"
+                    ></textarea>
+                </div>
+
+            </div>
+
+            <div class="admin-form-actions">
+
+                <button
+                    type="button"
+                    class="admin-button-secondary"
+                    id="adminProductCreateCancel"
+                >
+                    HỦY
+                </button>
+
+                <button
+                    type="submit"
+                    class="admin-button-primary"
+                >
+                    TẠO SẢN PHẨM
+                </button>
+
             </div>
         </form>
     </div>
