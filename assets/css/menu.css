@@ -285,3 +285,50 @@
     }
     
 }
+
+.season-product-section {
+    margin-top: 80px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(41, 55, 6, 0.15);
+}
+
+.season-product-section .section-heading {
+    margin-bottom: 32px;
+}
+
+.season-product-section .product-card {
+    position: relative;
+}
+
+.season-product-section .product-category {
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.season-product-section .menu-variant-select {
+    width: 100%;
+    margin: 10px 0 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(41, 55, 6, 0.25);
+    border-radius: 8px;
+    background: #F5EEC9;
+    color: #24271C;
+    font: inherit;
+    cursor: pointer;
+}
+
+.season-product-section .menu-variant-select:focus {
+    outline: 2px solid #D9E75B;
+    outline-offset: 2px;
+}
+
+.season-product-section .menu-add-to-cart {
+    width: 100%;
+}
+
+.season-product-section .product-empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 32px;
+    text-align: center;
+}

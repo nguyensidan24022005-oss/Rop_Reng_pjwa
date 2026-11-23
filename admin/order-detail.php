@@ -231,25 +231,8 @@ require_once __DIR__ . '/../includes/header.php';
 
 
                         <select id="orderStatus">
-
-                            <option value="pending">
-                                ĐANG XỬ LÝ
-                            </option>
-
-                            <option value="confirmed">
-                                ĐANG THỰC HIỆN
-                            </option>
-
-                            <option value="completed">
-                                HOÀN THÀNH
-                            </option>
-
-                            <option value="cancelled">
-                                ĐÃ HỦY
-                            </option>
-
+                            <!-- Options được tạo theo trạng thái hiện tại -->
                         </select>
-
 
                         <button
                             type="button"
@@ -455,6 +438,80 @@ async function loadOrderDetail() {
 }
 
 
+function renderOrderStatusOptions(currentStatus) {
+
+    const select = document.getElementById('orderStatus');
+
+    if (!select) {
+        return;
+    }
+
+    const transitions = {
+        pending: [
+            {
+                value: 'pending',
+                label: 'ĐANG XỬ LÝ'
+            },
+            {
+                value: 'confirmed',
+                label: 'ĐANG THỰC HIỆN'
+            },
+            {
+                value: 'cancelled',
+                label: 'ĐÃ HỦY'
+            }
+        ],
+        confirmed: [
+            {
+                value: 'confirmed',
+                label: 'ĐANG THỰC HIỆN'
+            },
+            {
+                value: 'completed',
+                label: 'HOÀN THÀNH'
+            },
+            {
+                value: 'cancelled',
+                label: 'ĐÃ HỦY'
+            }
+        ],
+        completed: [
+            {
+                value: 'completed',
+                label: 'HOÀN THÀNH'
+            }
+        ],
+        cancelled: [
+            {
+                value: 'cancelled',
+                label: 'ĐÃ HỦY'
+            }
+        ]
+    };
+
+    const options = transitions[currentStatus] || [];
+
+    select.innerHTML = '';
+
+    options.forEach(option => {
+        const element = document.createElement('option');
+
+        element.value = option.value;
+        element.textContent = option.label;
+
+        select.appendChild(element);
+    });
+
+    select.value = currentStatus;
+
+    const isTerminal =
+        currentStatus === 'completed' ||
+        currentStatus === 'cancelled';
+
+    select.disabled = isTerminal;
+}
+
+
 function renderOrderDetail(
     order,
     items
@@ -572,18 +629,7 @@ function renderOrderDetail(
      * SET CURRENT STATUS
      */
 
-    const statusSelect =
-        document.getElementById(
-            'orderStatus'
-        );
-
-
-    if (statusSelect) {
-
-        statusSelect.value =
-            order.status;
-
-    }
+    renderOrderStatusOptions(order.status);
 
 
     /*

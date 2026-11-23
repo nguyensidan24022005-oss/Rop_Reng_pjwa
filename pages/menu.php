@@ -61,6 +61,58 @@ if ($categorySlug !== '') {
 }
 
 $products = $productQuery->fetchAll();
+$seasonProductQuery = $pdo->query(
+    "SELECT
+        p.id,
+        p.name,
+        p.image,
+        p.season_start,
+        p.season_end,
+        pv.id AS variant_id,
+        pv.name AS variant_name,
+        pv.price AS variant_price
+    FROM products p
+    INNER JOIN product_variants pv
+        ON pv.product_id = p.id
+        AND pv.is_active = 1
+    WHERE p.is_active = 1
+        AND p.is_seasonal = 1
+        AND p.category_id IS NULL
+        AND p.season_start IS NOT NULL
+        AND p.season_end IS NOT NULL
+        AND p.season_start <= CURRENT_DATE()
+        AND p.season_end >= CURRENT_DATE()
+    ORDER BY p.id ASC, pv.id ASC"
+);
+
+$seasonProductRows = $seasonProductQuery->fetchAll();
+
+$seasonProducts = [];
+
+foreach ($seasonProductRows as $row) {
+
+    $productId = (int) $row['id'];
+
+    if (!isset($seasonProducts[$productId])) {
+
+        $seasonProducts[$productId] = [
+            'id' => $productId,
+            'name' => $row['name'],
+            'image' => $row['image'],
+            'season_start' => $row['season_start'],
+            'season_end' => $row['season_end'],
+            'variants' => [],
+        ];
+    }
+
+    $seasonProducts[$productId]['variants'][] = [
+        'id' => (int) $row['variant_id'],
+        'name' => $row['variant_name'],
+        'price' => (int) $row['variant_price'],
+    ];
+}
+
+$seasonProducts = array_values($seasonProducts);
 
 $variantQuery = $pdo->query(
     "SELECT
@@ -238,5 +290,141 @@ foreach ($variants as $variant) {
                 <?php endforeach; ?>
             </div>
         </div>
+    </section>
+
+    <section class="product-section season-product-section" id="season-products">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="section-eyebrow">
+                        SEASONAL SPECIAL
+                    </span>
+
+                    <h2>
+                        MÓN <span>THEO MÙA.</span>
+                    </h2>
+                </div>
+
+                <p>
+                    Những thức uống đặc biệt chỉ xuất hiện
+                    trong một khoảng thời gian nhất định.
+                </p>
+
+            </div>
+
+            <div class="product-grid">
+
+                <?php if (empty($seasonProducts)): ?>
+
+                    <p class="product-empty">
+                        Hiện chưa có món theo mùa.
+                    </p>
+
+                <?php endif; ?>
+
+                <?php foreach ($seasonProducts as $product): ?>
+
+                    <?php
+                    $variants = $product['variants'];
+                    $hasMultipleVariants = count($variants) > 1;
+                    $firstVariant = $variants[0] ?? null;
+                    ?>
+
+                    <?php if (!$firstVariant): ?>
+                        <?php continue; ?>
+                    <?php endif; ?>
+
+                    <article class="product-card">
+
+                        <div class="product-image">
+
+                            <?php if (!empty($product['image'])): ?>
+
+                                <img
+                                    src="<?= htmlspecialchars($product['image'], ENT_QUOTES, 'UTF-8') ?>"
+                                    alt="<?= htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8') ?>"
+                                    loading="lazy"
+                                >
+
+                            <?php else: ?>
+
+                                <div class="product-image-placeholder">
+                                    <span>RỐP RẺNG</span>
+                                </div>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                        <div class="product-card-content">
+
+                            <span class="product-category">
+                                MÓN THEO MÙA
+                            </span>
+
+                            <h3>
+                                <?= htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8') ?>
+                            </h3>
+
+                            <?php if ($hasMultipleVariants): ?>
+
+                                <select
+                                    class="menu-variant-select"
+                                    aria-label="Chọn kích thước"
+                                >
+
+                                    <?php foreach ($variants as $variant): ?>
+
+                                        <option
+                                            value="<?= (int) $variant['id'] ?>"
+                                            data-variant-name="<?= htmlspecialchars($variant['name'], ENT_QUOTES, 'UTF-8') ?>"
+                                            data-price="<?= (int) $variant['price'] ?>"
+                                        >
+                                            <?= htmlspecialchars($variant['name'], ENT_QUOTES, 'UTF-8') ?>
+                                            -
+                                            <?= number_format($variant['price'], 0, ',', '.') ?>đ
+                                        </option>
+
+                                    <?php endforeach; ?>
+
+                                </select>
+
+                                <span class="product-price">
+                                    <?= number_format($firstVariant['price'], 0, ',', '.') ?>đ
+                                </span>
+
+                            <?php else: ?>
+
+                                <span class="product-price">
+                                    <?= number_format($firstVariant['price'], 0, ',', '.') ?>đ
+                                </span>
+
+                            <?php endif; ?>
+
+                            <button
+                                type="button"
+                                class="menu-add-to-cart"
+                                data-product-id="<?= (int) $product['id'] ?>"
+                                data-product-name="<?= htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-variant-id="<?= (int) $firstVariant['id'] ?>"
+                                data-variant-name="<?= htmlspecialchars($firstVariant['name'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-price="<?= (int) $firstVariant['price'] ?>"
+                            >
+                                THÊM VÀO GIỎ
+                            </button>
+
+                        </div>
+
+                    </article>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        </div>
+
     </section>
 </main>
