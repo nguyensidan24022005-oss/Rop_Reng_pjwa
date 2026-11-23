@@ -1277,7 +1277,7 @@ async function loadAdminProducts() {
                         <th>SIZE</th>
                         <th>TRẠNG THÁI</th>
                         <th>NHÃN</th>
-                        <th>CHỈNH SỬA</th>
+                        <th>THAO TÁC</th>
                     </tr>
 
                 </thead>
@@ -1425,6 +1425,32 @@ async function loadAdminProducts() {
                                     </span>
                                 `;
 
+                        const nextActive =
+                            Number(product.is_active) === 1 ? 0 : 1;
+
+                        const toggleButtonHtml =
+                            nextActive === 0
+                                ? `
+                                    <button
+                                        type="button"
+                                        class="admin-product-toggle admin-product-toggle-hide"
+                                        data-product-id="${escapeHtml(product.id)}"
+                                        data-next-active="0"
+                                    >
+                                        ẨN
+                                    </button>
+                                `
+                                : `
+                                    <button
+                                        type="button"
+                                        class="admin-product-toggle admin-product-toggle-show"
+                                        data-product-id="${escapeHtml(product.id)}"
+                                        data-next-active="1"
+                                    >
+                                        HIỆN
+                                    </button>
+                                `;
+
                         return `
                             <tr>
                             
@@ -1477,13 +1503,16 @@ async function loadAdminProducts() {
                                 </td>
 
                                 <td>
-                                    <button
-                                        type="button"
-                                        class="admin-product-edit"
-                                        data-product-id="${escapeHtml(product.id)}"
-                                    >
-                                        SỬA
-                                    </button>
+                                    <div class="admin-product-actions">
+                                        <button
+                                            type="button"
+                                            class="admin-product-edit"
+                                            data-product-id="${escapeHtml(product.id)}"
+                                        >
+                                            SỬA
+                                        </button>
+                                        ${toggleButtonHtml}
+                                    </div>
                                 </td>
                                 
                             </tr>
@@ -1491,10 +1520,10 @@ async function loadAdminProducts() {
 
                     }).join('')}
 
-                </tbody>
+                                        </tbody>
 
-            </table>
-        `;
+                                    </table>
+                                `;
                         
     } catch (error) {
 
@@ -2151,6 +2180,103 @@ document.addEventListener('click', event => {
     openAdminProductEditModal(product);
 });
 
+document.addEventListener('click', async event => {
+
+    const button = event.target.closest(
+        '.admin-product-toggle'
+    );
+
+    if (!button) {
+        return;
+    }
+
+    const productId = Number(
+        button.dataset.productId
+    );
+
+    const nextActive = Number(
+        button.dataset.nextActive
+    );
+
+    if (
+        !Number.isInteger(productId) ||
+        productId <= 0 ||
+        ![0, 1].includes(nextActive)
+    ) {
+        return;
+    }
+
+    const product = adminProductsCache.find(
+        item => Number(item.id) === productId
+    );
+
+    const productName = product
+        ? product.name
+        : `#${productId}`;
+
+    const action = nextActive === 0
+        ? 'ẩn'
+        : 'hiện';
+
+    const confirmed = window.confirm(
+        `Bạn có chắc muốn ${action} sản phẩm "${productName}"?`
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    const originalText = button.textContent;
+
+    button.disabled = true;
+    button.textContent = 'ĐANG CẬP NHẬT...';
+
+    try {
+
+        const response = await fetch(
+            'api/admin-toggle-product.php',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: productId,
+                    is_active: nextActive
+                })
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(
+                result.message ||
+                'Không thể cập nhật trạng thái sản phẩm.'
+            );
+        }
+
+        await loadAdminProducts();
+
+    } catch (error) {
+
+        console.error(
+            'Toggle product status error:',
+            error
+        );
+
+        alert(
+            error.message ||
+            'Có lỗi xảy ra khi cập nhật trạng thái.'
+        );
+
+        button.disabled = false;
+        button.textContent = originalText;
+
+    }
+
+});
+
 document.addEventListener(
     'DOMContentLoaded',
     () => {
@@ -2187,7 +2313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'adminProductCreateCancel'
     );
 
-    const overlay = document.getElementById(
+    const overlay = document.querySelector(
         '[data-close-create-product-modal]'
     );
 
