@@ -190,7 +190,9 @@ document.addEventListener('click', event => {
     let variantName = button.dataset.variantName;
     let price = Number(button.dataset.price);
 
-    const productCard = button.closest('.menu-product-card');
+    const productCard = button.closest(
+        '.menu-product-card, .product-card'
+    );
 
     const variantSelect = productCard?.querySelector(
         '.menu-variant-select'

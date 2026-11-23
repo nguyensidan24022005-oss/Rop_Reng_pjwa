@@ -91,9 +91,13 @@ try {
             p.id,
             p.name AS product_name,
             p.is_active AS product_active,
-            c.is_active AS category_active
+            p.is_seasonal,
+            p.category_id,
+            c.is_active AS category_active,
+            p.season_start,
+            p.season_end
         FROM products p
-        INNER JOIN categories c
+        LEFT JOIN categories c
             ON c.id = p.category_id
         WHERE p.id = :product_id
         LIMIT 1"
@@ -174,13 +178,46 @@ try {
             );
         }
 
-        if (
-            (int) $product['product_active'] !== 1 ||
-            (int) $product['category_active'] !== 1
-        ) {
+        if ((int) $product['product_active'] !== 1) {
             throw new InvalidArgumentException(
                 'Sản phẩm hiện không khả dụng.'
             );
+        }
+
+        if ((int) $product['is_seasonal'] === 0) {
+
+            if (
+                empty($product['category_id']) ||
+                (int) $product['category_active'] !== 1
+            ) {
+                throw new InvalidArgumentException(
+                    'Sản phẩm hiện không khả dụng.'
+                );
+            }
+        }
+
+        if ((int) $product['is_seasonal'] === 1) {
+
+            if (
+                !empty($product['category_id']) ||
+                empty($product['season_start']) ||
+                empty($product['season_end'])
+            ) {
+                throw new InvalidArgumentException(
+                    'Sản phẩm theo mùa không hợp lệ.'
+                );
+            }
+
+            $today = date('Y-m-d');
+
+            if (
+                $today < $product['season_start'] ||
+                $today > $product['season_end']
+            ) {
+                throw new InvalidArgumentException(
+                    'Sản phẩm theo mùa hiện không được bán.'
+                );
+            }
         }
 
         $variantQuery->execute([
