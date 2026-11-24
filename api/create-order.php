@@ -115,6 +115,17 @@ try {
         LIMIT 1"
     );
 
+    $toppingQuery = $pdo->prepare(
+        "SELECT
+            id,
+            name,
+            price,
+            is_active
+        FROM toppings
+        WHERE id = :topping_id
+        LIMIT 1"
+    );
+
     foreach ($items as $item) {
 
         if (!is_array($item)) {
@@ -123,30 +134,25 @@ try {
             );
         }
 
-        $productId = filter_var(
-            $item['product_id'] ?? null,
-            FILTER_VALIDATE_INT,
-            ['options' => ['min_range' => 1]]
-        );
-        $variantId = filter_var(
-            $item['variant_id'] ?? null,
-            FILTER_VALIDATE_INT,
-            ['options' => ['min_range' => 1]]
-        );
+        $itemType = $item['item_type'] ?? 'product';
+
+        if (!is_string($itemType)) {
+            throw new InvalidArgumentException(
+                'Loại sản phẩm trong đơn không hợp lệ.'
+            );
+        }
+
         $quantity = filter_var(
             $item['quantity'] ?? null,
             FILTER_VALIDATE_INT,
             ['options' => ['min_range' => 1, 'max_range' => 99]]
         );
+
         $note = $item['note'] ?? '';
 
-        if (
-            $productId === false ||
-            $variantId === false ||
-            $quantity === false
-        ) {
+        if ($quantity === false) {
             throw new InvalidArgumentException(
-                'Thông tin sản phẩm trong đơn không hợp lệ.'
+                'Số lượng sản phẩm không hợp lệ.'
             );
         }
 
@@ -163,6 +169,97 @@ try {
                 $note,
                 0,
                 255
+            );
+        }
+
+        if ($itemType === 'topping') {
+
+            $toppingId = filter_var(
+                $item['topping_id'] ?? null,
+                FILTER_VALIDATE_INT,
+                ['options' => ['min_range' => 1]]
+            );
+
+            if ($toppingId === false) {
+                throw new InvalidArgumentException(
+                    'Thông tin topping trong đơn không hợp lệ.'
+                );
+            }
+
+            $productId = $item['product_id'] ?? null;
+            $variantId = $item['variant_id'] ?? null;
+
+            if (
+                $productId !== null ||
+                $variantId !== null
+            ) {
+                throw new InvalidArgumentException(
+                    'Topping không được gắn với sản phẩm.'
+                );
+            }
+
+            $toppingQuery->execute([
+                'topping_id' => $toppingId
+            ]);
+
+            $topping = $toppingQuery->fetch();
+
+            if (!$topping) {
+                throw new InvalidArgumentException(
+                    'Không tìm thấy topping.'
+                );
+            }
+
+            if ((int) $topping['is_active'] !== 1) {
+                throw new InvalidArgumentException(
+                    'Topping hiện không khả dụng.'
+                );
+            }
+
+            $unitPrice = (float) $topping['price'];
+
+            $lineTotal = $unitPrice * $quantity;
+
+            $subtotal += $lineTotal;
+
+            $validatedItems[] = [
+                'product_id' => null,
+                'variant_id' => null,
+                'product_name' => $topping['name'],
+                'variant_name' => 'Topping',
+                'unit_price' => $unitPrice,
+                'quantity' => $quantity,
+                'note' => $note !== '' ? $note : null,
+                'line_total' => $lineTotal
+            ];
+
+            continue;
+        }
+
+        if ($itemType !== 'product') {
+            throw new InvalidArgumentException(
+                'Loại sản phẩm trong đơn không hợp lệ.'
+            );
+        }
+
+        $productId = filter_var(
+            $item['product_id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        $variantId = filter_var(
+            $item['variant_id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        if (
+            $productId === false ||
+            $variantId === false
+        ) {
+            throw new InvalidArgumentException(
+                'Thông tin sản phẩm trong đơn không hợp lệ.'
             );
         }
 

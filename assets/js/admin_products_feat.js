@@ -625,60 +625,71 @@ function syncAdminProductEditVariant() {
 }
 
 function syncAdminProductCreateType() {
-    const typeInput = document.getElementById(
-        'adminCreateProductType'
-    );
+    const typeInput = document.getElementById('adminCreateProductType');
 
-    const categoryGroup = document.getElementById(
-        'adminCreateCategoryGroup'
-    );
+    const categoryGroup = document.getElementById('adminCreateCategoryGroup');
+    const categoryInput = document.getElementById('adminCreateProductCategory');
 
-    const categoryInput = document.getElementById(
-        'adminCreateProductCategory'
-    );
+    const startGroup = document.getElementById('adminCreateSeasonStartGroup');
+    const endGroup = document.getElementById('adminCreateSeasonEndGroup');
 
-    const startGroup = document.getElementById(
-        'adminCreateSeasonStartGroup'
-    );
+    const startInput = document.getElementById('adminCreateSeasonStart');
+    const endInput = document.getElementById('adminCreateSeasonEnd');
 
-    const endGroup = document.getElementById(
-        'adminCreateSeasonEndGroup'
-    );
+    if (!typeInput) return;
 
-    const startInput = document.getElementById(
-        'adminCreateSeasonStart'
-    );
+    const productType = typeInput.value;
 
-    const endInput = document.getElementById(
-        'adminCreateSeasonEnd'
-    );
+    const isSeason = productType === 'season';
+    const isTopping = productType === 'topping';
+    const isDrink = productType === 'drink';
 
-    if (
-        !typeInput ||
-        !categoryGroup ||
-        !categoryInput ||
-        !startGroup ||
-        !endGroup ||
-        !startInput ||
-        !endInput
-    ) {
+    if (isDrink) {
+        categoryGroup.hidden = false;
+        categoryInput.required = true;
+        categoryInput.disabled = false;
+
+        startGroup.hidden = true;
+        endGroup.hidden = true;
+
+        startInput.required = false;
+        endInput.required = false;
+
+        startInput.disabled = true;
+        endInput.disabled = true;
+
         return;
     }
 
-    const isSeason = typeInput.value === '1';
+    if (isSeason) {
+        categoryGroup.hidden = true;
+        categoryInput.required = false;
+        categoryInput.disabled = true;
 
-    categoryGroup.hidden = isSeason;
-    startGroup.hidden = !isSeason;
-    endGroup.hidden = !isSeason;
+        startGroup.hidden = false;
+        endGroup.hidden = false;
 
-    categoryInput.required = !isSeason;
-    categoryInput.disabled = isSeason;
+        startInput.required = true;
+        endInput.required = true;
 
-    startInput.required = isSeason;
-    endInput.required = isSeason;
+        startInput.disabled = false;
+        endInput.disabled = false;
 
-    startInput.disabled = !isSeason;
-    endInput.disabled = !isSeason;
+        return;
+    }
+
+    categoryGroup.hidden = false;
+    categoryInput.required = true;
+    categoryInput.disabled = false;
+
+    startGroup.hidden = true;
+    endGroup.hidden = true;
+
+    startInput.required = false;
+    endInput.required = false;
+
+    startInput.disabled = true;
+    endInput.disabled = true;
 }
 
 function syncAdminProductCreateVariant() {

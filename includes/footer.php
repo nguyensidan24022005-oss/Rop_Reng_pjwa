@@ -79,6 +79,8 @@ if (($currentPage ?? '') === 'admin') {
         $featureScripts[] = 'admin_dashboard_feat.js';
     } elseif ($adminPage === 'products.php') {
         $featureScripts[] = 'admin_products_feat.js';
+    } elseif ($adminPage === 'toppings.php') {
+        $featureScripts[] = 'admin_toppings.js';
     }
 }
 

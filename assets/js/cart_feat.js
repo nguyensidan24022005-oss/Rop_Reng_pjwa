@@ -60,10 +60,16 @@ function addToCart(product) {
 
         cart.push({
             cartKey: product.cartKey,
-            productId: product.productId,
+            itemType: product.itemType || 'product',
+
+            productId: product.productId ?? null,
             productName: product.productName,
-            variantId: product.variantId,
-            variantName: product.variantName,
+
+            toppingId: product.toppingId ?? null,
+
+            variantId: product.variantId ?? null,
+            variantName: product.variantName || '',
+
             price: product.price,
             quantity: 1,
             note: ''
@@ -106,6 +112,35 @@ document.addEventListener('click', event => {
         return;
     }
 
+    const toppingId = button.dataset.toppingId;
+
+    if (toppingId) {
+
+        const toppingName = button.dataset.toppingName;
+        const price = Number(button.dataset.price);
+
+        if (!toppingName || !price || price < 0) {
+            return;
+        }
+
+        addToCart({
+            cartKey: `topping-${toppingId}`,
+            itemType: 'topping',
+
+            toppingId: Number(toppingId),
+
+            productId: null,
+            productName: toppingName,
+
+            variantId: null,
+            variantName: 'Topping',
+
+            price
+        });
+
+        return;
+    }
+
     const productId = button.dataset.productId;
     const productName = button.dataset.productName;
 
@@ -138,11 +173,17 @@ document.addEventListener('click', event => {
 
     addToCart({
         cartKey: `${productId}-${variantId}`,
+        itemType: 'product',
+
         productId: Number(productId),
         productName,
+
+        toppingId: null,
+
         variantId: Number(variantId),
         variantName,
-        price,
+
+        price
     });
 });
 

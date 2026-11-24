@@ -59,8 +59,22 @@ if ($categorySlug !== '') {
         ORDER BY p.id ASC"
     );
 }
-
 $products = $productQuery->fetchAll();
+
+$toppingQuery = $pdo->query(
+    "SELECT
+        id,
+        name,
+        description,
+        price,
+        image
+    FROM toppings
+    WHERE is_active = 1
+    ORDER BY id ASC"
+);
+
+$toppings = $toppingQuery->fetchAll();
+
 $seasonProductQuery = $pdo->query(
     "SELECT
         p.id,
@@ -426,5 +440,99 @@ foreach ($variants as $variant) {
 
         </div>
 
+    </section>
+
+    <section class="product-section topping-section" id="toppings">
+        <div class="container">
+
+            <div class="section-heading">
+                <div>
+                    <span class="section-eyebrow">
+                        TOPPING
+                    </span>
+
+                    <h2>
+                        THÊM <span>TOPPING.</span>
+                    </h2>
+                </div>
+
+                <p>
+                    Chọn thêm topping yêu thích cho đơn hàng của bạn.
+                </p>
+            </div>
+
+            <div class="product-grid">
+
+                <?php if (empty($toppings)): ?>
+
+                    <p class="product-empty">
+                        Hiện chưa có topping.
+                    </p>
+
+                <?php endif; ?>
+
+                <?php foreach ($toppings as $topping): ?>
+
+                    <article class="product-card">
+
+                        <div class="product-image">
+
+                            <?php if (!empty($topping['image'])): ?>
+
+                                <img
+                                    src="<?= htmlspecialchars($topping['image'], ENT_QUOTES, 'UTF-8') ?>"
+                                    alt="<?= htmlspecialchars($topping['name'], ENT_QUOTES, 'UTF-8') ?>"
+                                    loading="lazy"
+                                >
+
+                            <?php else: ?>
+
+                                <div class="product-image-placeholder">
+                                    <span>RỐP RẺNG</span>
+                                </div>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                        <div class="product-card-content">
+
+                            <span class="product-category">
+                                TOPPING
+                            </span>
+
+                            <h3>
+                                <?= htmlspecialchars($topping['name'], ENT_QUOTES, 'UTF-8') ?>
+                            </h3>
+
+                            <?php if (!empty($topping['description'])): ?>
+                                <p>
+                                    <?= htmlspecialchars($topping['description'], ENT_QUOTES, 'UTF-8') ?>
+                                </p>
+                            <?php endif; ?>
+
+                            <span class="product-price">
+                                <?= number_format($topping['price'], 0, ',', '.') ?>đ
+                            </span>
+
+                            <button
+                                type="button"
+                                class="menu-add-to-cart"
+                                data-topping-id="<?= (int) $topping['id'] ?>"
+                                data-topping-name="<?= htmlspecialchars($topping['name'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-price="<?= (int) $topping['price'] ?>"
+                            >
+                                THÊM VÀO GIỎ
+                            </button>
+
+                        </div>
+
+                    </article>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        </div>
     </section>
 </main>

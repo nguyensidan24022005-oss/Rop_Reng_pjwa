@@ -96,8 +96,10 @@ async function submitOrder() {
         customerNameInput?.value.trim() || '';
 
     const items = cart.map(item => ({
+        item_type: item.itemType || 'product',
         product_id: item.productId,
         variant_id: item.variantId,
+        topping_id: item.toppingId,
         quantity: item.quantity,
         note: item.note || ''
     }));

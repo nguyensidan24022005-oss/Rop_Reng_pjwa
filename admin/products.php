@@ -408,11 +408,11 @@ require_once __DIR__ . '/../includes/header.php';
 
                     <select
                         id="adminCreateProductType"
-                        name="is_seasonal"
+                        name="product_type"
                         required
                     >
-                        <option value="0">DRINKS</option>
-                        <option value="1">SEASON PRODUCT</option>
+                        <option value="drink">DRINKS</option>
+                        <option value="season">SEASON PRODUCT</option>
                     </select>
                 </div>
 
