@@ -55,7 +55,34 @@
 
 </footer>
 
-<script src="assets/js/main.js?v=<?= filemtime(__DIR__ . '/../assets/js/main.js') ?>"></script>
+<?php
+$featureScripts = [
+    'common_feat.js',
+    'navigation_feat.js',
+    'cart_feat.js',
+];
+
+if (($currentPage ?? '') === 'checkout') {
+    $featureScripts[] = 'checkout_feat.js';
+}
+
+if (($currentPage ?? '') === 'admin') {
+    $adminPage = basename($_SERVER['SCRIPT_NAME'] ?? '');
+
+    if (in_array($adminPage, ['orders.php', 'order-detail.php'], true)) {
+        $featureScripts[] = 'admin_orders_feat.js';
+    } elseif ($adminPage === 'index.php') {
+        $featureScripts[] = 'admin_dashboard_feat.js';
+    } elseif ($adminPage === 'products.php') {
+        $featureScripts[] = 'admin_products_feat.js';
+    }
+}
+
+foreach ($featureScripts as $featureScript):
+    $featureScriptPath = __DIR__ . '/../assets/js/' . $featureScript;
+?>
+    <script src="assets/js/<?= htmlspecialchars($featureScript, ENT_QUOTES, 'UTF-8') ?>?v=<?= filemtime($featureScriptPath) ?>"></script>
+<?php endforeach; ?>
 
 </body>
 

@@ -13,11 +13,12 @@
 
 **Tên dự án:** Rốp Rẻng – Cà phê & Giải khát
 
-**Loại dự án:** Website F&B đặt món + hệ thống quản lý nội bộ.
+**Loại dự án:** Ứng dụng web F&B vận hành nội bộ cho cửa hàng.
 
 **Mục tiêu V1:**
 
-- Xây dựng website giới thiệu và bán sản phẩm của Rốp Rẻng.
+- Xây dựng một ứng dụng web kiểu POS đơn giản để **Staff và Owner** sử dụng chung tại cửa hàng.
+- Giao diện bán hàng cho phép Staff/Owner chọn món, variant, tạo đơn và xử lý đơn.
 - Hiển thị Menu động từ Database.
 - Quản lý danh mục và sản phẩm bằng Database.
 - Hỗ trợ sản phẩm có nhiều size/variant.
@@ -25,18 +26,80 @@
 - Tạo đơn hàng.
 - Lưu đơn hàng vào Database.
 - Quản lý đơn hàng cơ bản.
-- Có Admin Dashboard phục vụ vận hành cửa hàng.
+- Có Dashboard phục vụ vận hành cửa hàng.
 - Quản lý sản phẩm/danh mục.
 - Có thống kê doanh thu cơ bản.
+- Cho phép Staff/Owner **ẩn tạm thời sản phẩm** khi cửa hàng hết nguyên liệu hoặc tạm ngừng bán, sau đó có thể bật lại.
 - Giao diện hiện đại, dễ sử dụng, ưu tiên desktop.
-
----
 
 # 2. Phạm vi V1
 
+## 2.0. Mô hình người sử dụng và vận hành V1
+
+Rốp Rẻng V1 **không phải website e-commerce để Customer tự đăng nhập và tự đặt hàng**.
+
+Ứng dụng được thiết kế theo mô hình:
+
+> **Web POS nội bộ cho cửa hàng — Staff và Owner cùng sử dụng để bán hàng và vận hành.**
+
+### Đối tượng sử dụng
+
+**Staff**
+
+- Chọn món và variant tại quầy.
+- Thêm món vào giỏ.
+- Tạo đơn hàng cho khách.
+- Xem và xử lý các đơn hàng.
+- Theo dõi trạng thái đơn.
+
+**Owner**
+
+- Sử dụng các chức năng của Staff.
+- Quản lý sản phẩm và danh mục.
+- Ẩn/hiện sản phẩm khi tình trạng nguyên liệu thay đổi.
+- Theo dõi đơn hàng và doanh thu.
+- Sử dụng Dashboard để theo dõi hoạt động cửa hàng.
+
+### Mô hình truy cập V1
+
+- Staff và Owner **dùng chung ứng dụng nội bộ**.
+- V1 **không yêu cầu Customer account, Customer login hoặc Customer authentication**.
+- V1 **không triển khai hệ thống đăng nhập/phân quyền nhiều cấp cho Staff và Owner**.
+- Không xây dựng role/permission phức tạp trong V1.
+- Ứng dụng được giả định sử dụng trên thiết bị/môi trường vận hành của cửa hàng.
+- Nếu trong tương lai ứng dụng được đưa ra Internet công khai hoặc cần phân quyền từng nhân viên, đó sẽ là **một scope bảo mật riêng** và không thuộc mục tiêu của V1 hiện tại.
+
+### Mục đích của Product Management
+
+Product Management không chỉ dùng để chỉnh sửa dữ liệu sản phẩm.
+
+Một tình huống vận hành quan trọng của V1 là:
+
+```text
+Cửa hàng hết nguyên liệu
+        ↓
+Staff/Owner vào Product Management
+        ↓
+ẨN sản phẩm
+        ↓
+Sản phẩm không còn xuất hiện để bán
+        ↓
+Khi có lại nguyên liệu
+        ↓
+HIỆN sản phẩm
+```
+
+Vì vậy, `is_active` là một **trạng thái vận hành thực tế của món**, không phải chỉ là trạng thái kỹ thuật.
+
+### Nguyên tắc V1
+
+> **Ưu tiên vận hành cửa hàng nhanh, đơn giản và thực tế hơn việc xây dựng một hệ thống e-commerce đầy đủ.**
+
+---
+
 ## 2.1. Những gì V1 PHẢI có
 
-### Customer-facing website
+### Giao diện bán hàng tại quầy — Staff / Owner
 
 - Homepage
 - Menu
@@ -48,15 +111,16 @@
 - Order code sau khi tạo đơn
 - Responsive cơ bản
 
-### Admin / Staff
+### Staff / Owner Operations
 
-- Admin Dashboard
+- Dashboard
 - Quản lý sản phẩm
 - Quản lý danh mục
 - Quản lý đơn hàng
 - Xem chi tiết đơn
 - Cập nhật trạng thái đơn
 - Thống kê doanh thu cơ bản
+- Ẩn/hiện sản phẩm theo tình trạng kinh doanh thực tế
 
 ### Backend
 
@@ -76,6 +140,10 @@ Các tính năng dưới đây thuộc **V2 hoặc tương lai**.
 
 Không tự ý triển khai trong V1:
 
+- Staff login
+- Owner login
+- Admin login
+- RBAC
 - Customer registration
 - Customer login
 - Customer profile
@@ -113,7 +181,7 @@ Nếu một tính năng không nằm trong V1 nhưng có vẻ hữu ích:
 
 # 4. Mô hình vận hành V1
 
-Rốp Rẻng V1 tập trung vào **vận hành cửa hàng**, không xây dựng một nền tảng e-commerce đầy đủ.
+Rốp Rẻng V1 tập trung vào **vận hành cửa hàng và POS nội bộ**, không xây dựng một nền tảng e-commerce để Customer tự sử dụng.
 
 Luồng chính:
 
@@ -141,6 +209,19 @@ Order Code
 Admin / Staff quản lý đơn
 ```
 
+Staff và Owner sử dụng chung hệ thống nội bộ để:
+Bán hàng
+   ↓
+Tạo đơn
+   ↓
+Xử lý đơn
+   ↓
+Quản lý sản phẩm
+   ↓
+Ẩn / hiện món theo tình trạng nguyên liệu và thức uống.
+   ↓
+Theo dõi doanh thu
+
 Không có:
 
 ```text
@@ -150,8 +231,6 @@ Shipping
 Online Payment
 Loyalty
 Coupon
-```
-
 ---
 
 # 5. Công nghệ
@@ -200,41 +279,69 @@ C:\xampp\htdocs\Rop_Reng_pjwa
 
 ---
 
-# 6. Kiến trúc thư mục
+# 6. Cấu trúc thư mục
 
-Kiến trúc hiện tại:
+Cấu trúc hiện tại:
 
 ```text
 Rop_Reng_pjwa/
 │
 ├── admin/
+│   ├── index.php
+│   ├── order-detail.php
 │   ├── orders.php
-│   └── order-detail.php
+│   └── products.php
 │
 ├── api/
+│   ├── admin-create-product.php
+│   ├── admin-products.php
+│   ├── admin-toggle-product.php
+│   ├── admin-update-product.php
 │   ├── create-order.php
-│   ├── orders.php
+│   ├── dashboard-stats.php
 │   ├── order-detail.php
+│   ├── orders.php
 │   └── update-order-status.php
 │
 ├── assets/
 │   ├── css/
-│   │   ├── style.css
+│   │   ├── admin.css
+│   │   ├── checkout.css
 │   │   ├── homepage.css
 │   │   ├── menu.css
-│   │   ├── checkout.css
-│   │   └── admin.css
+│   │   └── style.css
 │   │
-│   ├── js/
-│   │   └── main.js
+│   ├── images/
+│   │   ├── backgrounds/
+│   │   ├── brand/
+│   │   ├── decorations/
+│   │   └── products/
+│   │       ├── drinks/
+│   │       │   ├── giaikhatcaphe/
+│   │       │   ├── latte/
+│   │       │   ├── nuocgiaikhat/
+│   │       │   ├── phedi/
+│   │       │   ├── quocdancaphe/
+│   │       │   ├── thongdongcaphe/
+│   │       │   └── trasua/
+│   │       ├── season_products/
+│   │       └── toppings/
 │   │
-│   └── images/
-│
-├── auth/
-│   └── auth.js
+│   └── js/
+│       ├── admin_dashboard_feat.js
+│       ├── admin_orders_feat.js
+│       ├── admin_products_feat.js
+│       ├── cart_feat.js
+│       ├── checkout_feat.js
+│       ├── common_feat.js
+│       └── navigation_feat.js
 │
 ├── config/
-│   └── db.php
+│   ├── db.php
+│   └── test-db.php
+│
+├── database/
+│   └── rop_reng.sql
 │
 ├── includes/
 │   ├── header.php
@@ -242,12 +349,14 @@ Rop_Reng_pjwa/
 │   └── footer.php
 │
 ├── pages/
+│   ├── checkout.php
 │   ├── home.php
-│   ├── menu.php
-│   └── checkout.php
+│   └── menu.php
 │
+├── .gitignore
 ├── checkout.php
 ├── index.php
+├── menu.php
 └── README.md
 ```
 
