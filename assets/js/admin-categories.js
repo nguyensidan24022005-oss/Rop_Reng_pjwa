@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const tableBody = document.getElementById('categoriesTableBody');
+    const categoryCount = document.getElementById('adminCategoryCount');
     const modal = document.getElementById('categoryModal');
     const form = document.getElementById('categoryForm');
 
@@ -66,11 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderCategories() {
 
+        if (categoryCount) {
+            categoryCount.textContent = String(categories.length);
+        }
+
         if (!categories.length) {
 
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="5">
+                    <td class="admin-category-empty" colspan="5">
                         Chưa có danh mục.
                     </td>
                 </tr>
@@ -86,44 +91,46 @@ document.addEventListener('DOMContentLoaded', () => {
             return `
                 <tr>
 
-                    <td>${escapeHtml(category.id)}</td>
+                    <td class="admin-category-row-id">${escapeHtml(category.id)}</td>
 
                     <td>
-                        <strong>
+                        <strong class="admin-category-name">
                             ${escapeHtml(category.name)}
                         </strong>
                     </td>
 
                     <td>
-                        <code>
+                        <code class="admin-category-slug">
                             ${escapeHtml(category.slug)}
                         </code>
                     </td>
 
                     <td>
-                        <span class="admin-status ${active ? 'is-active' : 'is-inactive'}">
+                        <span class="admin-category-status ${active ? 'is-active' : 'is-inactive'}">
                             ${active ? 'ĐANG BÁN' : 'ĐANG ẨN'}
                         </span>
                     </td>
 
                     <td>
 
-                        <div class="admin-table-actions">
+                        <div class="admin-category-actions">
 
                             <button
                                 type="button"
-                                class="admin-action-button"
+                                class="admin-category-action"
                                 data-action="edit"
                                 data-id="${category.id}"
+                                aria-label="Sửa danh mục ${escapeHtml(category.name)}"
                             >
                                 SỬA
                             </button>
 
                             <button
                                 type="button"
-                                class="admin-action-button"
+                                class="admin-category-action ${active ? 'is-hide' : 'is-show'}"
                                 data-action="toggle"
                                 data-id="${category.id}"
+                                aria-label="${active ? 'Ẩn' : 'Hiện'} danh mục ${escapeHtml(category.name)}"
                             >
                                 ${active ? 'ẨN' : 'HIỆN'}
                             </button>
@@ -144,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="5">
+                    <td class="admin-category-empty" colspan="5">
                         Đang tải danh mục...
                     </td>
                 </tr>
