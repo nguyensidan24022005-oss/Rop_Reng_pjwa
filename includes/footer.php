@@ -62,6 +62,10 @@ $featureScripts = [
     'cart_feat.js',
 ];
 
+if (($currentPage ?? '') === 'home') {
+    $featureScripts[] = 'hero_slider_feat.js';
+}
+
 if (($currentPage ?? '') === 'checkout') {
     $featureScripts[] = 'checkout_feat.js';
 }

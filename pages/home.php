@@ -28,10 +28,31 @@
 
             </div>
 
-            <div class="hero-symbol">
-                <span>✳</span>
-                <strong>RỐP<br>RẺNG</strong>
-                <span>ϟ</span>
+            <div class="hero-ad-slider" data-hero-ad-slider>
+                <div class="hero-ad-track">
+
+                    <div class="hero-ad-slide is-active">
+                        <img
+                            src="assets/images/ads/ad_1.jpe"
+                            alt="Quảng cáo Rốp Rẻng"
+                        >
+                    </div>
+
+                    <div class="hero-ad-slide">
+                        <img
+                            src="assets/images/ads/ad_2.jpe"
+                            alt="Quảng cáo Rốp Rẻng"
+                        >
+                    </div>
+
+                    <div class="hero-ad-slide">
+                        <img
+                            src="assets/images/ads/ad_3.jpe"
+                            alt="Quảng cáo Rốp Rẻng"
+                        >
+                    </div>
+
+                </div>
             </div>
 
         </div>
