@@ -44,6 +44,22 @@ try {
 
     $products = $productQuery->fetchAll();
 
+    $toppingQuery = $pdo->query(
+        "SELECT
+            id,
+            name,
+            description,
+            price,
+            image,
+            is_active,
+            created_at,
+            updated_at
+        FROM toppings
+        ORDER BY id ASC"
+    );
+
+    $toppings = $toppingQuery->fetchAll(PDO::FETCH_ASSOC);
+
     $categoryQuery = $pdo->query(
         "SELECT
             id,
@@ -108,9 +124,45 @@ try {
 
     unset($product);
 
+    foreach ($toppings as &$topping) {
+
+        $topping['id'] = 'topping-' . (int) $topping['id'];
+
+        $topping['topping_id'] =
+            (int) str_replace(
+                'topping-',
+                '',
+                $topping['id']
+            );
+
+        $topping['price'] =
+            (float) $topping['price'];
+
+        $topping['is_active'] =
+            (int) $topping['is_active'];
+
+        $topping['is_best_seller'] = 0;
+        $topping['is_new'] = 0;
+        $topping['is_seasonal'] = 0;
+
+        $topping['category_id'] = null;
+        $topping['category_name'] = 'TOPPING';
+        $topping['category_slug'] = 'topping';
+
+        $topping['season_start'] = null;
+        $topping['season_end'] = null;
+
+        $topping['variants'] = [];
+
+        $topping['is_topping'] = 1;
+    }
+
+    unset($topping);
+
     echo json_encode([
         'success' => true,
         'data' => $products,
+        'toppings' => $toppings,
         'categories' => $categories
     ], JSON_UNESCAPED_UNICODE);
 

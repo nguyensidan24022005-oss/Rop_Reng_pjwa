@@ -35,6 +35,20 @@ try {
     $name = $readString('name');
     $description = $readString('description');
 
+    $productType = $readString('product_type');
+
+    if (!in_array(
+        $productType,
+        ['drink', 'season', 'topping'],
+        true
+    )) {
+        throw new InvalidArgumentException(
+            'Loại sản phẩm không hợp lệ.'
+        );
+    }
+
+    $isTopping = $productType === 'topping';
+
     $categoryRaw = $readString('category_id');
 
     $variantType = $readString('variant_type');
@@ -62,17 +76,29 @@ try {
 
     $categoryId = null;
 
-    if ($isSeasonal === 0) {
+    if ($isTopping) {
+
+        // Topping không thuộc danh mục Drink
+        $categoryId = null;
+
+    } elseif ($isSeasonal === 0) {
+
         $categoryId = filter_var(
             $categoryRaw,
             FILTER_VALIDATE_INT
         );
-        if ($categoryId === false || $categoryId <= 0) {
+
+        if (
+            $categoryId === false ||
+            $categoryId <= 0
+        ) {
             throw new InvalidArgumentException(
                 'DRINKS phải có danh mục hợp lệ.'
             );
         }
+
     } elseif ($categoryRaw !== '') {
+
         throw new InvalidArgumentException(
             'SEASON PRODUCT không được có danh mục.'
         );
@@ -88,7 +114,36 @@ try {
         $variantType = 'default';
     }
 
-    if ($variantType === 'default') {
+    if ($isTopping) {
+
+        $priceInput = $readString('price');
+
+        if (!is_numeric($priceInput)) {
+            throw new InvalidArgumentException(
+                'Giá topping không hợp lệ.'
+            );
+        }
+
+        $price = (float) $priceInput;
+
+        if (
+            !is_finite($price) ||
+            $price <= 0
+        ) {
+            throw new InvalidArgumentException(
+                'Giá topping phải lớn hơn 0.'
+            );
+        }
+
+        if ($price > 99999999.99) {
+            throw new InvalidArgumentException(
+                'Giá topping vượt quá giới hạn cho phép.'
+            );
+        }
+
+        $variants = [];
+
+    } elseif ($variantType === 'default') {
 
         $priceInput = $readString('price');
 
@@ -101,7 +156,6 @@ try {
         $price = (float) $priceInput;
 
         if (!is_finite($price) || $price <= 0) {
-
             throw new InvalidArgumentException(
                 'Giá sản phẩm phải lớn hơn 0.'
             );
@@ -137,13 +191,13 @@ try {
             $priceM <= 0 ||
             $priceL <= 0
         ) {
-
             throw new InvalidArgumentException(
                 'Giá M và L phải lớn hơn 0.'
             );
         }
 
         $price = $priceM;
+
         $variants = [
             [
                 'name' => 'M',
@@ -158,7 +212,7 @@ try {
     } else {
 
         throw new InvalidArgumentException(
-            'Loại sản phẩm không hợp lệ.'
+            'Loại variant không hợp lệ.'
         );
     }
 
@@ -192,7 +246,7 @@ try {
         return $value;
     };
 
-    if ($isSeasonal === 1) {
+    if (!$isTopping && $isSeasonal === 1) {
         $seasonStart = $normalizeDate($seasonStart);
         $seasonEnd = $normalizeDate($seasonEnd);
         if (
@@ -216,7 +270,8 @@ try {
     $uploadedFilePath = null;
 
     $category = null;
-    if ($isSeasonal === 0) {
+
+    if (!$isTopping && $isSeasonal === 0) {
         $categoryQuery = $pdo->prepare(
             "SELECT id, slug
             FROM categories
@@ -286,17 +341,34 @@ try {
                 );
             }
 
-            if ($isSeasonal === 1) {
+            if ($isTopping) {
+
+                $uploadDirectory =
+                    __DIR__
+                    . '/../assets/images/products/toppings';
+
+                $imageBasePath =
+                    'assets/images/products/toppings/';
+
+            } elseif ($isSeasonal === 1) {
+
                 $uploadDirectory =
                     __DIR__
                     . '/../assets/images/products/season_products';
 
                 $imageBasePath =
                     'assets/images/products/season_products/';
+
             } else {
+
                 $categorySlug = $category['slug'];
 
-                if (!preg_match('/\A[a-z0-9_-]+\z/i', $categorySlug)) {
+                if (
+                    !preg_match(
+                        '/\A[a-z0-9_-]+\z/i',
+                        $categorySlug
+                    )
+                ) {
                     throw new RuntimeException(
                         'Danh mục có mã đường dẫn không hợp lệ.'
                     );
@@ -347,6 +419,51 @@ try {
     }
 
     $pdo->beginTransaction();
+
+    if ($isTopping) {
+
+        $toppingInsert = $pdo->prepare(
+            "INSERT INTO toppings (
+                name,
+                description,
+                price,
+                image,
+                is_active
+            ) VALUES (
+                :name,
+                :description,
+                :price,
+                :image,
+                1
+            )"
+        );
+
+        $toppingInsert->execute([
+            'name' => $name,
+            'description' =>
+                $description !== ''
+                    ? $description
+                    : null,
+            'price' => $price,
+            'image' => $imagePath
+        ]);
+
+        $toppingId =
+            (int) $pdo->lastInsertId();
+
+        $pdo->commit();
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Tạo topping thành công.',
+            'data' => [
+                'id' => $toppingId,
+                'type' => 'topping'
+            ]
+        ], JSON_UNESCAPED_UNICODE);
+
+        exit;
+    }
 
     $productInsert = $pdo->prepare(
         "INSERT INTO products (

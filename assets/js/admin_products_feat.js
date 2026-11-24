@@ -68,15 +68,26 @@ async function loadAdminProducts() {
             );
         }
 
-        adminProductsCache = result.data || [];
-        adminCategoriesCache = Array.isArray(result.categories)
-            ? result.categories
-            : [];
-
-        const products =
+        const productItems =
             Array.isArray(result.data)
                 ? result.data
                 : [];
+
+        const toppingItems =
+            Array.isArray(result.toppings)
+                ? result.toppings
+                : [];
+
+        const products = [
+            ...productItems,
+            ...toppingItems
+        ];
+
+        adminProductsCache = products;
+
+        adminCategoriesCache = Array.isArray(result.categories)
+            ? result.categories
+            : [];
 
         if (productCount) {
 
@@ -335,6 +346,7 @@ async function loadAdminProducts() {
 
                                 <td>
                                     <div class="admin-product-actions">
+
                                         <button
                                             type="button"
                                             class="admin-product-edit"
@@ -342,7 +354,9 @@ async function loadAdminProducts() {
                                         >
                                             SỬA
                                         </button>
+
                                         ${toggleButtonHtml}
+
                                     </div>
                                 </td>
                                 
@@ -373,6 +387,7 @@ async function loadAdminProducts() {
 }
 
 function openAdminProductEditModal(product) {
+
     const modal = document.getElementById(
         'adminProductEditModal'
     );
@@ -431,10 +446,14 @@ function openAdminProductEditModal(product) {
         !isNewInput
     ) {
         console.error(
-            'Không tìm thấy Product Edit Modal hoặc các trường Variant.'
+            'Không tìm thấy Product Edit Modal.'
         );
         return;
     }
+
+    const isTopping =
+        product.is_topping === 1 ||
+        product.is_topping === '1';
 
     idInput.value = product.id ?? '';
     nameInput.value = product.name ?? '';
@@ -443,51 +462,105 @@ function openAdminProductEditModal(product) {
     priceMInput.value = '';
     priceLInput.value = '';
 
-    const activeVariants = Array.isArray(product.variants)
-        ? product.variants.filter(
-            variant => Number(variant.is_active) === 1
-        )
-        : [];
+    /*
+     * TOPPING
+     */
+    if (isTopping) {
 
-    const defaultVariant = activeVariants.find(
-        variant => variant.name === 'Default'
-    );
+        typeInput.value = 'topping';
 
-    const mVariant = activeVariants.find(
-        variant => variant.name === 'M'
-    );
+        variantTypeInput.value = 'default';
 
-    const lVariant = activeVariants.find(
-        variant => variant.name === 'L'
-    );
+        variantTypeInput.disabled = true;
+
+        priceInput.value = product.price ?? '';
+
+        priceMInput.value = '';
+        priceLInput.value = '';
+
+        activeInput.value =
+            Number(product.is_active) === 1
+                ? '1'
+                : '0';
+
+        bestSellerInput.checked = false;
+        isNewInput.checked = false;
+
+        syncAdminProductEditType();
+        syncAdminProductEditVariant();
+
+        modal.hidden = false;
+        modal.classList.add('is-open');
+
+        return;
+    }
+
+    /*
+     * DRINK / SEASON
+     */
+
+    variantTypeInput.disabled = false;
+
+    const activeVariants =
+        Array.isArray(product.variants)
+            ? product.variants.filter(
+                variant =>
+                    Number(variant.is_active) === 1
+            )
+            : [];
+
+    const defaultVariant =
+        activeVariants.find(
+            variant => variant.name === 'Default'
+        );
+
+    const mVariant =
+        activeVariants.find(
+            variant => variant.name === 'M'
+        );
+
+    const lVariant =
+        activeVariants.find(
+            variant => variant.name === 'L'
+        );
 
     if (
         activeVariants.length === 1 &&
         defaultVariant
     ) {
-        variantTypeInput.value = 'default'
-        priceInput.value = defaultVariant.price;
+
+        variantTypeInput.value = 'default';
+
+        priceInput.value =
+            defaultVariant.price;
+
     } else if (
         activeVariants.length === 2 &&
         mVariant &&
         lVariant
     ) {
-        variantTypeInput.value = 'size'
 
-        priceMInput.value = mVariant.price;
-        priceLInput.value = lVariant.price;
+        variantTypeInput.value = 'size';
+
+        priceMInput.value =
+            mVariant.price;
+
+        priceLInput.value =
+            lVariant.price;
+
     } else {
+
         console.error(
             'Cấu trúc variant không hợp lệ:',
             product
         );
+
         alert(
             'Sản phẩm có nhóm phân loại không hợp lệ. Vui lòng kiểm tra dữ liệu.'
         );
+
         return;
     }
-
-    syncAdminProductEditVariant();
 
     activeInput.value =
         Number(product.is_active) === 1
@@ -496,32 +569,42 @@ function openAdminProductEditModal(product) {
 
     bestSellerInput.checked =
         Number(product.is_best_seller) === 1;
+
     isNewInput.checked =
         Number(product.is_new) === 1;
 
     const isSeasonal =
         Number(product.is_seasonal) === 1;
 
-    typeInput.value = isSeasonal
-        ? 'season'
-        : 'drink';
+    typeInput.value =
+        isSeasonal
+            ? 'season'
+            : 'drink';
 
     syncAdminProductEditType();
+    syncAdminProductEditVariant();
 
-    const categoryInput = document.getElementById(
-        'adminEditProductCategory'
-    );
+    const categoryInput =
+        document.getElementById(
+            'adminEditProductCategory'
+        );
 
-    const seasonStartInput = document.getElementById(
-        'adminEditSeasonStart'
-    );
+    const seasonStartInput =
+        document.getElementById(
+            'adminEditSeasonStart'
+        );
 
-    const seasonEndInput = document.getElementById(
-        'adminEditSeasonEnd'
-    );
+    const seasonEndInput =
+        document.getElementById(
+            'adminEditSeasonEnd'
+        );
 
     if (categoryInput) {
-        populateAdminCategorySelect(categoryInput);
+
+        populateAdminCategorySelect(
+            categoryInput
+        );
+
         categoryInput.value =
             product.category_id !== null &&
             product.category_id !== undefined
@@ -530,11 +613,13 @@ function openAdminProductEditModal(product) {
     }
 
     if (seasonStartInput) {
+
         seasonStartInput.value =
             product.season_start ?? '';
     }
 
     if (seasonEndInput) {
+
         seasonEndInput.value =
             product.season_end ?? '';
     }
@@ -544,24 +629,38 @@ function openAdminProductEditModal(product) {
 }
 
 function syncAdminProductEditType() {
+
     const typeInput = document.getElementById(
         'adminEditProductType'
     );
+
     const categoryGroup = document.getElementById(
         'adminEditCategoryGroup'
     );
+
     const seasonStartGroup = document.getElementById(
         'adminEditSeasonStartGroup'
     );
+
     const seasonEndGroup = document.getElementById(
         'adminEditSeasonEndGroup'
+    );
+
+    const variantGroup = document.getElementById(
+        'adminEditVariantTypeGroup'
+    );
+
+    const variantInput = document.getElementById(
+        'adminEditVariantType'
     );
 
     if (
         !typeInput ||
         !categoryGroup ||
         !seasonStartGroup ||
-        !seasonEndGroup
+        !seasonEndGroup ||
+        !variantGroup ||
+        !variantInput
     ) {
         return;
     }
@@ -569,9 +668,27 @@ function syncAdminProductEditType() {
     const isSeason =
         typeInput.value === 'season';
 
-    categoryGroup.hidden = isSeason;
-    seasonStartGroup.hidden = !isSeason;
-    seasonEndGroup.hidden = !isSeason;
+    const isTopping =
+        typeInput.value === 'topping';
+
+    categoryGroup.hidden =
+        isSeason || isTopping;
+
+    seasonStartGroup.hidden =
+        !isSeason;
+
+    seasonEndGroup.hidden =
+        !isSeason;
+
+    variantGroup.hidden =
+        isTopping;
+
+    variantInput.disabled =
+        isTopping;
+
+    if (isTopping) {
+        variantInput.value = 'default';
+    }
 }
 
 function syncAdminProductEditVariant() {
@@ -615,6 +732,19 @@ function syncAdminProductEditVariant() {
     }
     const isSize = variantTypeInput.value === 'size';
 
+    if (variantTypeInput.disabled) {
+
+        defaultGroup.hidden = false;
+        priceMGroup.hidden = true;
+        priceLGroup.hidden = true;
+
+        defaultPriceInput.required = true;
+        priceMInput.required = false;
+        priceLInput.required = false;
+
+        return;
+    }
+
     defaultGroup.hidden = isSize;
     priceMGroup.hidden = !isSize;
     priceLGroup.hidden = !isSize;
@@ -625,71 +755,162 @@ function syncAdminProductEditVariant() {
 }
 
 function syncAdminProductCreateType() {
-    const typeInput = document.getElementById('adminCreateProductType');
+    const typeInput = document.getElementById(
+        'adminCreateProductType'
+    );
 
-    const categoryGroup = document.getElementById('adminCreateCategoryGroup');
-    const categoryInput = document.getElementById('adminCreateProductCategory');
+    const categoryGroup = document.getElementById(
+        'adminCreateCategoryGroup'
+    );
 
-    const startGroup = document.getElementById('adminCreateSeasonStartGroup');
-    const endGroup = document.getElementById('adminCreateSeasonEndGroup');
+    const categoryInput = document.getElementById(
+        'adminCreateProductCategory'
+    );
 
-    const startInput = document.getElementById('adminCreateSeasonStart');
-    const endInput = document.getElementById('adminCreateSeasonEnd');
+    const startGroup = document.getElementById(
+        'adminCreateSeasonStartGroup'
+    );
 
-    if (!typeInput) return;
+    const endGroup = document.getElementById(
+        'adminCreateSeasonEndGroup'
+    );
 
-    const productType = typeInput.value;
+    const startInput = document.getElementById(
+        'adminCreateSeasonStart'
+    );
 
-    const isSeason = productType === 'season';
-    const isTopping = productType === 'topping';
-    const isDrink = productType === 'drink';
+    const endInput = document.getElementById(
+        'adminCreateSeasonEnd'
+    );
 
-    if (isDrink) {
-        categoryGroup.hidden = false;
-        categoryInput.required = true;
-        categoryInput.disabled = false;
+    const variantGroup = document.getElementById(
+        'adminCreateVariantTypeGroup'
+    );
 
-        startGroup.hidden = true;
-        endGroup.hidden = true;
+    const defaultPriceGroup = document.getElementById(
+        'adminCreateDefaultPriceGroup'
+    );
 
-        startInput.required = false;
-        endInput.required = false;
+    const priceMGroup = document.getElementById(
+        'adminCreatePriceMGroup'
+    );
 
-        startInput.disabled = true;
-        endInput.disabled = true;
+    const priceLGroup = document.getElementById(
+        'adminCreatePriceLGroup'
+    );
 
+    const variantInput = document.getElementById(
+        'adminCreateVariantType'
+    );
+
+    const priceInput = document.getElementById(
+        'adminCreatePrice'
+    );
+
+    const priceMInput = document.getElementById(
+        'adminCreatePriceM'
+    );
+
+    const priceLInput = document.getElementById(
+        'adminCreatePriceL'
+    );
+
+    const flagsGroup = document.getElementById(
+        'adminCreateFlagsGroup'
+    );
+
+    if (
+        !typeInput ||
+        !categoryGroup ||
+        !categoryInput ||
+        !startGroup ||
+        !endGroup ||
+        !startInput ||
+        !endInput
+    ) {
         return;
     }
 
-    if (isSeason) {
-        categoryGroup.hidden = true;
-        categoryInput.required = false;
-        categoryInput.disabled = true;
+    const type = typeInput.value;
 
-        startGroup.hidden = false;
-        endGroup.hidden = false;
+    const isDrink = type === 'drink';
+    const isSeason = type === 'season';
+    const isTopping = type === 'topping';
 
-        startInput.required = true;
-        endInput.required = true;
+    categoryGroup.hidden = !isDrink;
 
-        startInput.disabled = false;
-        endInput.disabled = false;
+    categoryInput.required = isDrink;
+    categoryInput.disabled = !isDrink;
 
-        return;
+    if (!isDrink) {
+        categoryInput.value = '';
     }
 
-    categoryGroup.hidden = false;
-    categoryInput.required = true;
-    categoryInput.disabled = false;
+    startGroup.hidden = !isSeason;
+    endGroup.hidden = !isSeason;
 
-    startGroup.hidden = true;
-    endGroup.hidden = true;
+    startInput.required = isSeason;
+    endInput.required = isSeason;
 
-    startInput.required = false;
-    endInput.required = false;
+    startInput.disabled = !isSeason;
+    endInput.disabled = !isSeason;
 
-    startInput.disabled = true;
-    endInput.disabled = true;
+    if (!isSeason) {
+        startInput.value = '';
+        endInput.value = '';
+    }
+
+    if (variantGroup) {
+        variantGroup.hidden = isTopping;
+    }
+
+    if (variantInput) {
+        variantInput.disabled = isTopping;
+
+        if (isTopping) {
+            variantInput.value = 'default';
+        }
+    }
+
+    if (isTopping) {
+
+        // Topping chỉ có 1 giá
+        defaultPriceGroup.hidden = false;
+
+        priceMGroup.hidden = true;
+        priceLGroup.hidden = true;
+
+        priceInput.required = true;
+        priceInput.disabled = false;
+
+        priceMInput.required = false;
+        priceMInput.disabled = true;
+
+        priceLInput.required = false;
+        priceLInput.disabled = true;
+
+    } else {
+
+        syncAdminProductCreateVariant();
+    }
+
+    if (flagsGroup) {
+        flagsGroup.hidden = isTopping;
+
+        flagsGroup
+            .querySelectorAll(
+                'input[type="checkbox"]'
+            )
+            .forEach(input => {
+
+                input.disabled = isTopping;
+
+                if (isTopping) {
+                    input.checked = false;
+                }
+
+            });
+    }
 }
 
 function syncAdminProductCreateVariant() {
@@ -882,8 +1103,186 @@ document.addEventListener('DOMContentLoaded', () => {
                         'button[type="submit"]'
                     );
 
-                const isSeason = typeInput.value === 'season';
-                const isSize = variantTypeInput.value === 'size';
+                const isSeason =
+                    typeInput.value === 'season';
+
+                const isTopping =
+                    typeInput.value === 'topping';
+
+                const isSize =
+                    variantTypeInput.value === 'size';
+
+                if (isTopping) {
+
+                    const currentItem =
+                        adminProductsCache.find(
+                            item =>
+                                String(item.id) ===
+                                String(idInput.value)
+                        );
+
+                    if (!currentItem) {
+
+                        alert(
+                            'Không tìm thấy topping hiện tại.'
+                        );
+
+                        return;
+                    }
+
+                    const rawId =
+                        String(idInput.value)
+                            .replace('topping-', '');
+
+                    const toppingId =
+                        Number(rawId);
+
+                    const toppingPrice =
+                        Number(priceInput.value);
+
+                    if (
+                        !Number.isInteger(toppingId) ||
+                        toppingId <= 0 ||
+                        !nameInput.value.trim() ||
+                        !Number.isFinite(toppingPrice) ||
+                        toppingPrice <= 0
+                    ) {
+                        alert(
+                            'Vui lòng kiểm tra tên và giá topping.'
+                        );
+                        return;
+                    }
+
+                    try {
+
+                        if (submitButton) {
+                            submitButton.disabled = true;
+                            submitButton.textContent =
+                                'ĐANG LƯU...';
+                        }
+
+                        const response =
+                            await fetch(
+                                'api/admin-toppings.php',
+                                {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type':
+                                            'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        id: toppingId,
+                                        name: nameInput.value.trim(),
+                                        price: toppingPrice,
+
+                                        description:
+                                            currentItem.description || null,
+
+                                        image:
+                                            currentItem.image || null
+                                    })
+                                }
+                            );
+
+                        const result =
+                            await response.json();
+
+                        if (
+                            !response.ok ||
+                            !result.success
+                        ) {
+                            throw new Error(
+                                result.message ||
+                                'Không thể cập nhật topping.'
+                            );
+                        }
+
+                        /*
+                        * Cập nhật trạng thái nếu người dùng
+                        * thay đổi Đang bán / Ngừng bán.
+                        */
+                        const currentProduct =
+                            adminProductsCache.find(
+                                item =>
+                                    String(item.id) ===
+                                    String(idInput.value)
+                            );
+
+                        const currentActive =
+                            currentProduct
+                                ? Number(
+                                    currentProduct.is_active
+                                )
+                                : null;
+
+                        const nextActive =
+                            Number(activeInput.value);
+
+                        if (
+                            currentActive !== null &&
+                            currentActive !== nextActive
+                        ) {
+
+                            const toggleResponse =
+                                await fetch(
+                                    'api/admin-toppings.php',
+                                    {
+                                        method: 'PATCH',
+                                        headers: {
+                                            'Content-Type':
+                                                'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            id: toppingId
+                                        })
+                                    }
+                                );
+
+                            const toggleResult =
+                                await toggleResponse.json();
+
+                            if (
+                                !toggleResponse.ok ||
+                                !toggleResult.success
+                            ) {
+                                throw new Error(
+                                    toggleResult.message ||
+                                    'Không thể cập nhật trạng thái topping.'
+                                );
+                            }
+                        }
+
+                        alert(
+                            'Cập nhật topping thành công.'
+                        );
+
+                        closeModal();
+
+                        await loadAdminProducts();
+
+                    } catch (error) {
+
+                        console.error(
+                            'Update topping error:',
+                            error
+                        );
+
+                        alert(
+                            error.message ||
+                            'Có lỗi xảy ra khi cập nhật topping.'
+                        );
+
+                    } finally {
+
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.textContent =
+                                'LƯU';
+                        }
+                    }
+
+                    return;
+                }
 
                 const price = isSize
                     ? Number(priceMInput.value)
@@ -1049,102 +1448,206 @@ document.addEventListener('click', event => {
     openAdminProductEditModal(product);
 });
 
-document.addEventListener('click', async event => {
+document.addEventListener(
+    'click',
+    async event => {
 
-    const button = event.target.closest(
-        '.admin-product-toggle'
-    );
-
-    if (!button) {
-        return;
-    }
-
-    const productId = Number(
-        button.dataset.productId
-    );
-
-    const nextActive = Number(
-        button.dataset.nextActive
-    );
-
-    if (
-        !Number.isInteger(productId) ||
-        productId <= 0 ||
-        ![0, 1].includes(nextActive)
-    ) {
-        return;
-    }
-
-    const product = adminProductsCache.find(
-        item => Number(item.id) === productId
-    );
-
-    const productName = product
-        ? product.name
-        : `#${productId}`;
-
-    const action = nextActive === 0
-        ? 'ẩn'
-        : 'hiện';
-
-    const confirmed = window.confirm(
-        `Bạn có chắc muốn ${action} sản phẩm "${productName}"?`
-    );
-
-    if (!confirmed) {
-        return;
-    }
-
-    const originalText = button.textContent;
-
-    button.disabled = true;
-    button.textContent = 'ĐANG CẬP NHẬT...';
-
-    try {
-
-        const response = await fetch(
-            'api/admin-toggle-product.php',
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id: productId,
-                    is_active: nextActive
-                })
-            }
+        const button = event.target.closest(
+            '.admin-product-toggle'
         );
 
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-            throw new Error(
-                result.message ||
-                'Không thể cập nhật trạng thái sản phẩm.'
-            );
+        if (!button) {
+            return;
         }
 
-        await loadAdminProducts();
+        const rawId =
+            String(button.dataset.productId || '');
 
-    } catch (error) {
+        const nextActive =
+            Number(button.dataset.nextActive);
 
-        console.error(
-            'Toggle product status error:',
-            error
-        );
+        const isTopping =
+            rawId.startsWith('topping-');
 
-        alert(
-            error.message ||
-            'Có lỗi xảy ra khi cập nhật trạng thái.'
-        );
+        const toppingId =
+            isTopping
+                ? Number(
+                    rawId.replace(
+                        'topping-',
+                        ''
+                    )
+                )
+                : null;
 
-        button.disabled = false;
-        button.textContent = originalText;
+        const productId =
+            isTopping
+                ? null
+                : Number(rawId);
+
+        /*
+         * Kiểm tra ID
+         */
+        if (isTopping) {
+
+            if (
+                !Number.isInteger(toppingId) ||
+                toppingId <= 0
+            ) {
+                console.error(
+                    'Topping ID không hợp lệ:',
+                    rawId
+                );
+                return;
+            }
+
+        } else {
+
+            if (
+                !Number.isInteger(productId) ||
+                productId <= 0
+            ) {
+                console.error(
+                    'Product ID không hợp lệ:',
+                    rawId
+                );
+                return;
+            }
+
+        }
+
+        if (![0, 1].includes(nextActive)) {
+            return;
+        }
+
+        /*
+         * Tìm item trong cache
+         */
+        const item =
+            adminProductsCache.find(
+                currentItem =>
+                    String(currentItem.id) ===
+                    rawId
+            );
+
+        const itemName =
+            item
+                ? item.name
+                : (
+                    isTopping
+                        ? `#${toppingId}`
+                        : `#${productId}`
+                );
+
+        const action =
+            nextActive === 0
+                ? 'ẩn'
+                : 'hiện';
+
+        const confirmed =
+            window.confirm(
+                `Bạn có chắc muốn ${action} ${
+                    isTopping
+                        ? 'topping'
+                        : 'sản phẩm'
+                } "${itemName}"?`
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        const originalText =
+            button.textContent;
+
+        button.disabled = true;
+        button.textContent =
+            'ĐANG CẬP NHẬT...';
+
+        try {
+
+            let response;
+
+            /*
+             * TOPPING
+             * → dùng PATCH admin-toppings.php
+             */
+            if (isTopping) {
+
+                response = await fetch(
+                    'api/admin-toppings.php',
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type':
+                                'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: toppingId
+                        })
+                    }
+                );
+
+            /*
+             * DRINK / SEASON
+             * → dùng API Product hiện tại
+             */
+            } else {
+
+                response = await fetch(
+                    'api/admin-toggle-product.php',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':
+                                'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: productId,
+                            is_active:
+                                nextActive
+                        })
+                    }
+                );
+            }
+
+            const result =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !result.success
+            ) {
+                throw new Error(
+                    result.message ||
+                    `Không thể ${action} ${
+                        isTopping
+                            ? 'topping'
+                            : 'sản phẩm'
+                    }.`
+                );
+            }
+
+            await loadAdminProducts();
+
+        } catch (error) {
+
+            console.error(
+                'Toggle item error:',
+                error
+            );
+
+            alert(
+                error.message ||
+                'Có lỗi xảy ra khi cập nhật trạng thái.'
+            );
+
+            button.disabled = false;
+            button.textContent =
+                originalText;
+        }
 
     }
-
-});
+);
 
 document.addEventListener(
     'DOMContentLoaded',
@@ -1326,7 +1829,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'adminCreateSeasonEnd'
         );
 
-        const isSeason = typeInput.value === '1';
+        const isSeason = typeInput.value === 'season';
         const isSize = variantInput.value === 'size';
 
         if (
@@ -1392,7 +1895,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (modal) {
                 modal.hidden = true;
+                modal.classList.remove('is-open');
             }
+
             await loadAdminProducts();
         } catch (error) {
             console.error(

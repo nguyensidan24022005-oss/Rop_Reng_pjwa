@@ -148,7 +148,10 @@ require_once __DIR__ . '/../includes/header.php';
                     >
                 </div>
 
-                <div class="admin-form-group">
+                <div
+                    class="admin-form-group"
+                    id="adminEditVariantTypeGroup"
+                >
                     <label for="adminEditVariantType">
                         Nhóm phân loại
                     </label>
@@ -225,6 +228,10 @@ require_once __DIR__ . '/../includes/header.php';
 
                         <option value="season">
                             SEASON PRODUCT
+                        </option>
+
+                        <option value="topping">
+                            TOPPING
                         </option>
                     </select>
                 </div>
@@ -413,6 +420,7 @@ require_once __DIR__ . '/../includes/header.php';
                     >
                         <option value="drink">DRINKS</option>
                         <option value="season">SEASON PRODUCT</option>
+                        <option value="topping">TOPPING</option>
                     </select>
                 </div>
 
@@ -471,7 +479,10 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
 
                 <!-- VARIANT TYPE -->
-                <div class="admin-form-group">
+                <div 
+                    class="admin-form-group"
+                    id="adminCreateVariantTypeGroup"
+                >
                     <label for="adminCreateVariantType">
                         Cấu trúc biến thể
                     </label>
@@ -562,7 +573,10 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
 
                 <!-- FLAGS -->
-                <div class="admin-form-group">
+                <div 
+                    class="admin-form-group"
+                    id="adminCreateFlagsGroup"
+                >
                     <label>Nhãn sản phẩm</label>
 
                     <label class="admin-form-checkbox">
