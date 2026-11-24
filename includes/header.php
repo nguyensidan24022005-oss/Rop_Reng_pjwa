@@ -31,7 +31,7 @@ if (!isset($pageTitle)) {
 
     <link rel="stylesheet" href="assets/css/homepage.css?v=<?= filemtime(__DIR__ . '/../assets/css/homepage.css') ?>">
 
-    <link rel="stylesheet" href="assets/css/menu.css">
+    <link rel="stylesheet" href="assets/css/menu.css?v=<?= filemtime(__DIR__ . '/../assets/css/menu.css') ?>">
 
     <link rel="stylesheet" href="assets/css/checkout.css?v=<?= filemtime(__DIR__ . '/../assets/css/checkout.css') ?>">
 

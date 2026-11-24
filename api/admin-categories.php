@@ -42,8 +42,7 @@ try {
                 slug,
                 image,
                 is_active,
-                created_at,
-                updated_at
+                created_at
              FROM categories
              ORDER BY id ASC"
         );
@@ -58,13 +57,33 @@ try {
 
         $data = getRequestData();
 
-        $name = trim($data['name'] ?? '');
-        $slug = trim($data['slug'] ?? '');
+        $name = $data['name'] ?? null;
+        $slug = $data['slug'] ?? null;
+
+        if (!is_string($name) || !is_string($slug)) {
+            jsonResponse([
+                'success' => false,
+                'message' => 'Dữ liệu danh mục không hợp lệ.'
+            ], 422);
+        }
+
+        $name = trim($name);
+        $slug = trim($slug);
 
         if ($name === '' || $slug === '') {
             jsonResponse([
                 'success' => false,
                 'message' => 'Tên và slug danh mục là bắt buộc.'
+            ], 422);
+        }
+
+        if (
+            mb_strlen($name, 'UTF-8') > 100 ||
+            mb_strlen($slug, 'UTF-8') > 100
+        ) {
+            jsonResponse([
+                'success' => false,
+                'message' => 'Dữ liệu danh mục không hợp lệ.'
             ], 422);
         }
 
@@ -107,11 +126,32 @@ try {
 
         $data = getRequestData();
 
-        $id = (int) ($data['id'] ?? 0);
-        $name = trim($data['name'] ?? '');
-        $slug = trim($data['slug'] ?? '');
+        $idValue = $data['id'] ?? null;
+        $id = is_int($idValue) || is_string($idValue)
+            ? filter_var($idValue, FILTER_VALIDATE_INT)
+            : false;
+        $name = $data['name'] ?? null;
+        $slug = $data['slug'] ?? null;
 
-        if ($id <= 0 || $name === '' || $slug === '') {
+        if (!is_string($name) || !is_string($slug)) {
+            jsonResponse([
+                'success' => false,
+                'message' => 'Dữ liệu danh mục không hợp lệ.'
+            ], 422);
+        }
+
+        $name = trim($name);
+        $slug = trim($slug);
+
+        if (
+            $id === false ||
+            $id === null ||
+            $id <= 0 ||
+            $name === '' ||
+            $slug === '' ||
+            mb_strlen($name, 'UTF-8') > 100 ||
+            mb_strlen($slug, 'UTF-8') > 100
+        ) {
             jsonResponse([
                 'success' => false,
                 'message' => 'Dữ liệu danh mục không hợp lệ.'
@@ -177,9 +217,12 @@ try {
 
         $data = getRequestData();
 
-        $id = (int) ($data['id'] ?? 0);
+        $idValue = $data['id'] ?? null;
+        $id = is_int($idValue) || is_string($idValue)
+            ? filter_var($idValue, FILTER_VALIDATE_INT)
+            : false;
 
-        if ($id <= 0) {
+        if ($id === false || $id === null || $id <= 0) {
             jsonResponse([
                 'success' => false,
                 'message' => 'ID danh mục không hợp lệ.'

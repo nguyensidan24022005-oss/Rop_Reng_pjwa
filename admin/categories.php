@@ -180,6 +180,6 @@ require_once __DIR__ . '/../includes/header.php';
 
 </div>
 
-<script src="../assets/js/admin-categories.js?v=<?= filemtime(__DIR__ . '/../assets/js/admin-categories.js') ?>"></script>
+<script src="assets/js/admin-categories.js?v=<?= filemtime(__DIR__ . '/../assets/js/admin-categories.js') ?>"></script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

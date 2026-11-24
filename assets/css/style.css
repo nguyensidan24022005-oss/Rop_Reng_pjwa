@@ -1,14 +1,25 @@
 :root {
     --color-primary: #293706;
+    --color-primary-rgb: 41, 55, 6;
     --color-primary-light: #465B16;
+    --color-primary-deep: #192204;
+    --color-primary-deep-rgb: 25, 34, 4;
 
     --color-background: #F5EEC9;
+    --color-background-rgb: 245, 238, 201;
     --color-accent: #D9E75B;
+    --color-accent-rgb: 217, 231, 91;
     --color-yellow: #F2C75C;
+    --color-yellow-rgb: 242, 199, 92;
+    --color-yellow-hover: #E3B63D;
+    --color-accent-hover: #C6D344;
 
     --color-text: #24271C;
+    --color-text-rgb: 36, 39, 28;
     --color-muted: #C6C8A8;
     --color-white: #FFFFFF;
+    --color-black-rgb: 0, 0, 0;
+    --color-input-border: #D8D8D8;
 
     --font-main: 'Be Vietnam Pro', sans-serif;
 
@@ -164,7 +175,7 @@ img {
     gap: 8px;
     min-height: 42px;
     padding: 0 14px;
-    border: 1px solid rgba(245, 238, 201, 0.25);
+    border: 1px solid rgba(var(--color-background-rgb), 0.25);
     border-radius: 8px;
     background: transparent;
     color: var(--color-background);
@@ -200,7 +211,7 @@ img {
     position: fixed;
     inset: 0;
     z-index: 9997;
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(var(--color-black-rgb), 0.45);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -213,7 +224,7 @@ img {
     right: 0;
     z-index: 9998;
 
-    display: flex;
+    display: none;
     flex-direction: column;
 
     width: min(430px, 100vw);
@@ -222,15 +233,16 @@ img {
     background: var(--color-primary);
     color: var(--color-background);
 
-    border-left: 1px solid rgba(245, 238, 201, 0.15);
+    border-left: 1px solid rgba(var(--color-background-rgb), 0.15);
 
     transform: translateX(100%);
     transition: transform 0.03s ease;
 
-    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.25);
+    box-shadow: -20px 0 50px rgba(var(--color-black-rgb), 0.25);
 }
 
 .cart-drawer.is-open {
+    display: flex;
     transform: translateX(0);
 }
 
@@ -247,7 +259,7 @@ img {
 
     padding: 26px 28px;
 
-    border-bottom: 1px solid rgba(245, 238, 201, 0.12);
+    border-bottom: 1px solid rgba(var(--color-background-rgb), 0.12);
 }
 
 .cart-drawer-eyebrow {
@@ -278,7 +290,7 @@ img {
     width: 40px;
     height: 40px;
 
-    border: 1px solid rgba(245, 238, 201, 0.18);
+    border: 1px solid rgba(var(--color-background-rgb), 0.18);
     border-radius: 50%;
 
     background: transparent;
@@ -308,9 +320,9 @@ img {
 .cart-drawer-footer {
     padding: 22px 28px 28px;
 
-    border-top: 1px solid rgba(245, 238, 201, 0.12);
+    border-top: 1px solid rgba(var(--color-background-rgb), 0.12);
 
-    background: rgba(25, 34, 4, 0.96);
+    background: rgba(var(--color-primary-deep-rgb), 0.96);
 }
 
 .cart-subtotal {
@@ -322,7 +334,7 @@ img {
 }
 
 .cart-subtotal span {
-    color: rgba(245, 238, 201, 0.65);
+    color: rgba(var(--color-background-rgb), 0.65);
 
     font-size: 10px;
     font-weight: 900;
@@ -404,7 +416,7 @@ img {
 
     padding: 20px 0;
 
-    border-bottom: 1px solid rgba(245, 238, 201, 0.12);
+    border-bottom: 1px solid rgba(var(--color-background-rgb), 0.12);
 }
 
 .cart-item-info {
@@ -449,10 +461,10 @@ img {
 
     padding: 0 6px;
 
-    border: 1px solid rgba(245, 238, 201, 0.16);
+    border: 1px solid rgba(var(--color-background-rgb), 0.16);
     border-radius: 8px;
 
-    background: rgba(245, 238, 201, 0.05);
+    background: rgba(var(--color-background-rgb), 0.05);
 }
 
 .cart-item-quantity span {
@@ -506,7 +518,7 @@ img {
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.08em;
-    color: rgba(245, 238, 201, 0.55);
+    color: rgba(var(--color-background-rgb), 0.55);
 }
 
 .cart-note-input {
@@ -515,22 +527,22 @@ img {
     resize: vertical;
     min-height: 48px;
     padding: 9px 10px;
-    border: 1px solid rgba(245, 238, 201, 0.14);
+    border: 1px solid rgba(var(--color-background-rgb), 0.14);
     border-radius: 8px;
     outline: none;
-    background: rgba(245, 238, 201, 0.05);
-    color: #F5EEC9;
+    background: rgba(var(--color-background-rgb), 0.05);
+    color: var(--color-background);
     font-family: inherit;
     font-size: 12px;
 }
 
 .cart-note-input::placeholder {
-    color: rgba(245, 238, 201, 0.3);
+    color: rgba(var(--color-background-rgb), 0.3);
 }
 
 .cart-note-input:focus {
-    border-color: #D9E75B;
-    background: rgba(245, 238, 201, 0.08);
+    border-color: var(--color-accent);
+    background: rgba(var(--color-background-rgb), 0.08);
 }
 
 .cart-empty {
@@ -568,7 +580,7 @@ img {
     border: 0;
 
     background: transparent;
-    color: rgba(245, 238, 201, 0.45);
+    color: rgba(var(--color-background-rgb), 0.45);
 
     font-family: inherit;
     font-size: 9px;

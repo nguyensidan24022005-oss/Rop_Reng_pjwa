@@ -6,8 +6,8 @@
 
 .menu-hero {
     padding: 90px 0 70px;
-    background: rgba(25, 34, 4, 0.92);
-    border-bottom: 1px solid rgba(245, 238, 201, 0.14);
+    background: rgba(var(--color-primary-deep-rgb), 0.92);
+    border-bottom: 1px solid rgba(var(--color-background-rgb), 0.14);
 }
 
 .menu-hero .section-eyebrow {
@@ -35,14 +35,14 @@
 .menu-hero p {
     max-width: 560px;
     margin-top: 24px;
-    color: rgba(245, 238, 201, 0.72);
+    color: rgba(var(--color-background-rgb), 0.72);
     font-size: 16px;
     line-height: 1.7;
 }
 
 .menu-section {
     padding: 70px 0 100px;
-    background: rgba(41, 55, 6, 0.96);
+    background: rgba(var(--color-primary-rgb), 0.96);
 }
 
 .menu-categories {
@@ -58,10 +58,10 @@
     justify-content: center;
     min-height: 42px;
     padding: 0 18px;
-    border: 1px solid rgba(245, 238, 201, 0.18);
+    border: 1px solid rgba(var(--color-background-rgb), 0.18);
     border-radius: 999px;
-    background: rgba(245, 238, 201, 0.05);
-    color: rgba(245, 238, 201, 0.78);
+    background: rgba(var(--color-background-rgb), 0.05);
+    color: rgba(var(--color-background-rgb), 0.78);
     font-size: 12px;
     font-weight: 800;
     text-decoration: none;
@@ -85,16 +85,16 @@
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
-    border: 1px solid rgba(245, 238, 201, 0.15);
+    border: 1px solid rgba(var(--color-background-rgb), 0.15);
     border-radius: 14px;
-    background: rgba(245, 238, 201, 0.07);
+    background: rgba(var(--color-background-rgb), 0.07);
     transition: var(--transition);
 }
 
 .menu-product-card:hover {
     transform: translateY(-6px);
     border-color: var(--color-accent);
-    background: rgba(245, 238, 201, 0.11);
+    background: rgba(var(--color-background-rgb), 0.11);
 }
 
 .menu-product-image {
@@ -122,7 +122,7 @@
     justify-content: center;
     width: 100%;
     height: 100%;
-    color: rgba(245, 238, 201, 0.5);
+    color: rgba(var(--color-background-rgb), 0.5);
     font-size: 12px;
     font-weight: 900;
     letter-spacing: 2px;
@@ -160,7 +160,7 @@
     gap: 7px;
     margin-top: 16px;
     padding-top: 14px;
-    border-top: 1px solid rgba(245, 238, 201, 0.12);
+    border-top: 1px solid rgba(var(--color-background-rgb), 0.12);
 }
 
 .menu-variant {
@@ -168,7 +168,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    color: rgba(245, 238, 201, 0.68);
+    color: rgba(var(--color-background-rgb), 0.68);
     font-size: 12px;
     font-weight: 600;
 }
@@ -191,10 +191,10 @@
     width: 100%;
     min-height: 42px;
     padding: 0 14px;
-    border: 1px solid rgba(245, 238, 201, 0.18);
+    border: 1px solid rgba(var(--color-background-rgb), 0.18);
     border-radius: 8px;
     outline: none;
-    background: rgba(245, 238, 201, 0.06);
+    background: rgba(var(--color-background-rgb), 0.06);
     color: var(--color-background);
     font-family: inherit;
     font-size: 12px;
@@ -289,7 +289,7 @@
 .season-product-section {
     margin-top: 80px;
     padding-top: 40px;
-    border-top: 1px solid rgba(41, 55, 6, 0.15);
+    border-top: 1px solid rgba(var(--color-primary-rgb), 0.15);
 }
 
 .season-product-section .section-heading {
@@ -309,16 +309,16 @@
     width: 100%;
     margin: 10px 0 12px;
     padding: 10px 12px;
-    border: 1px solid rgba(41, 55, 6, 0.25);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.25);
     border-radius: 8px;
-    background: #F5EEC9;
-    color: #24271C;
+    background: var(--color-background);
+    color: var(--color-text);
     font: inherit;
     cursor: pointer;
 }
 
 .season-product-section .menu-variant-select:focus {
-    outline: 2px solid #D9E75B;
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
 }
 
