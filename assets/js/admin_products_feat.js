@@ -409,6 +409,14 @@ function openAdminProductEditModal(product) {
         'adminEditProductActive'
     );
 
+    const bestSellerInput = document.getElementById(
+        'adminEditProductBestSeller'
+    );
+
+    const isNewInput = document.getElementById(
+        'adminEditProductIsNew'
+    );
+
     if (
         !modal ||
         !idInput ||
@@ -418,7 +426,9 @@ function openAdminProductEditModal(product) {
         !priceMInput ||
         !priceLInput ||
         !typeInput ||
-        !activeInput
+        !activeInput ||
+        !bestSellerInput ||
+        !isNewInput
     ) {
         console.error(
             'Không tìm thấy Product Edit Modal hoặc các trường Variant.'
@@ -484,6 +494,11 @@ function openAdminProductEditModal(product) {
             ? '1'
             : '0';
 
+    bestSellerInput.checked =
+        Number(product.is_best_seller) === 1;
+    isNewInput.checked =
+        Number(product.is_new) === 1;
+
     const isSeasonal =
         Number(product.is_seasonal) === 1;
 
@@ -525,6 +540,7 @@ function openAdminProductEditModal(product) {
     }
 
     modal.hidden = false;
+    modal.classList.add('is-open');
 }
 
 function syncAdminProductEditType() {
@@ -763,6 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModal = () => {
         if (modal) {
             modal.hidden = true;
+            modal.classList.remove('is-open');
         }
     };
 
@@ -841,6 +858,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     'adminEditProductActive'
                 );
 
+                const bestSellerInput = document.getElementById(
+                    'adminEditProductBestSeller'
+                );
+
+                const isNewInput = document.getElementById(
+                    'adminEditProductIsNew'
+                );
+
                 const submitButton =
                     editForm.querySelector(
                         'button[type="submit"]'
@@ -869,6 +894,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     ),
 
                     is_active: Number(activeInput.value),
+                    is_best_seller: bestSellerInput.checked ? 1 : 0,
+                    is_new: isNewInput.checked ? 1 : 0,
                     is_seasonal: isSeason ? 1 : 0,
 
                     category_id: isSeason
@@ -1171,6 +1198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const closeModal = () => {
         modal.hidden = true;
+        modal.classList.remove('is-open');
     };
     const loadCategories = async () => {
         const response = await fetch(
@@ -1202,6 +1230,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await loadCategories();
 
             modal.hidden = false;
+            modal.classList.add('is-open');
         } catch (error) {
             console.error(
                 'Load create product categories error:',

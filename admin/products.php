@@ -298,6 +298,30 @@ require_once __DIR__ . '/../includes/header.php';
                     </select>
                 </div>
 
+                <div class="admin-form-group">
+                    <label>Nhãn sản phẩm</label>
+
+                    <label class="admin-form-checkbox">
+                        <input
+                            type="checkbox"
+                            id="adminEditProductBestSeller"
+                            name="is_best_seller"
+                            value="1"
+                        >
+                        Best Seller
+                    </label>
+
+                    <label class="admin-form-checkbox">
+                        <input
+                            type="checkbox"
+                            id="adminEditProductIsNew"
+                            name="is_new"
+                            value="1"
+                        >
+                        Sản phẩm mới
+                    </label>
+                </div>
+
             </div>
 
             <div class="admin-form-actions">

@@ -185,6 +185,13 @@ try {
         $image = trim($image);
     }
 
+    $bestSeller = array_key_exists('is_best_seller', $input)
+        ? $readFlag($input['is_best_seller'], 'Nhãn Best Seller')
+        : null;
+    $isNew = array_key_exists('is_new', $input)
+        ? $readFlag($input['is_new'], 'Nhãn sản phẩm mới')
+        : null;
+
     // 4. Determine whether the request uses the new or legacy variant format.
     $variantType = $readString('variant_type');
 
@@ -243,7 +250,12 @@ try {
     $pdo->beginTransaction();
 
     $existingQuery = $pdo->prepare("
-        SELECT id, description, image
+        SELECT
+            id,
+            description,
+            image,
+            is_best_seller,
+            is_new
         FROM products
         WHERE id = :id
         LIMIT 1
@@ -270,6 +282,14 @@ try {
 
     if ($image === null || $image === '') {
         $image = $existingProduct['image'];
+    }
+
+    if ($bestSeller === null) {
+        $bestSeller = (int) $existingProduct['is_best_seller'];
+    }
+
+    if ($isNew === null) {
+        $isNew = (int) $existingProduct['is_new'];
     }
 
     // 6. Verify category is active for DRINKS.
@@ -361,6 +381,8 @@ try {
             price = :price,
             image = :image,
             is_active = :is_active,
+            is_best_seller = :is_best_seller,
+            is_new = :is_new,
             is_seasonal = :is_seasonal,
             season_start = :season_start,
             season_end = :season_end
@@ -386,6 +408,12 @@ try {
         $image === null ? PDO::PARAM_NULL : PDO::PARAM_STR
     );
     $updateProduct->bindValue(':is_active', $isActive, PDO::PARAM_INT);
+    $updateProduct->bindValue(
+        ':is_best_seller',
+        $bestSeller,
+        PDO::PARAM_INT
+    );
+    $updateProduct->bindValue(':is_new', $isNew, PDO::PARAM_INT);
     $updateProduct->bindValue(':is_seasonal', $isSeasonal, PDO::PARAM_INT);
     $updateProduct->bindValue(
         ':season_start',
