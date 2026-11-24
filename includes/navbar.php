@@ -42,6 +42,7 @@ $currentPage = $currentPage ?? 'home';
             <a 
                 href="admin/"
                 class="header-admin-link"
+                aria-label="Mở trang quản trị"
             >
                 QUẢN TRỊ ↗
             </a>

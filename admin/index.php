@@ -12,7 +12,7 @@ require_once __DIR__ . '/../includes/header.php';
 
     <div class="container admin-container">
 
-        <div class="admin-header">
+        <div class="admin-header admin-dashboard-header">
 
             <div>
                 <span class="admin-eyebrow">
@@ -24,6 +24,16 @@ require_once __DIR__ . '/../includes/header.php';
                 <p>
                     Tổng quan hoạt động và quản lý cửa hàng.
                 </p>
+            </div>
+
+            <div class="admin-dashboard-header-actions">
+                <a
+                    href="admin/orders.php"
+                    class="button-primary admin-dashboard-cta"
+                >
+                    <span>QUẢN LÝ ĐƠN HÀNG</span>
+                    <span aria-hidden="true">→</span>
+                </a>
             </div>
 
         </div>
@@ -89,17 +99,17 @@ require_once __DIR__ . '/../includes/header.php';
 
                     <div class="admin-stats-grid admin-stats-grid-revenue">
 
-                        <article class="admin-stats-card admin-stat-card-highlight">
+                        <article class="admin-stat-card admin-stat-card-highlight">
                             <span>HÔM NAY</span>
                             <strong id="dashboardTodayRevenue">0đ</strong>
                         </article>
 
-                        <article class="admin-stats-card admin-stat-card-highlight">
+                        <article class="admin-stat-card admin-stat-card-highlight">
                             <span>THÁNG NÀY</span>
                             <strong id="dashboardMonthRevenue">0đ</strong>
                         </article>
 
-                        <article class="admin-stats-card admin-stat-card-highlight">
+                        <article class="admin-stat-card admin-stat-card-highlight">
                             <span>TỔNG DOANH THU</span>
                             <strong id="dashboardTotalRevenue">0đ</strong>
                         </article>
@@ -235,13 +245,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
 
             <div class="admin-quick-actions">
-
-                <a 
-                    href="admin/orders.php"
-                    class="admin-action-button"
-                >
-                    QUẢN LÝ ĐƠN HÀNG →
-                </a>
 
                 <a 
                     href="menu.php"
